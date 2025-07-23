@@ -1,0 +1,7 @@
+[
+  ["dev.shaaf.waver.prompts.AbstractionAnalyzer"],
+  ["dev.shaaf.waver.prompts.ChapterOrderAnalyzer"],
+  ["dev.shaaf.waver.prompts.RelationshipAnalyzer"],
+  ["dev.shaaf.waver.prompts.IntroChapter"],
+  ["dev.shaaf.waver.prompts.TutorialWriter"]
+]

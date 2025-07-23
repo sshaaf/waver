@@ -1,0 +1,16 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\QMETA-INF/services/.*\\E"
+      },
+      {
+        "pattern": "\\Qlogger.properties\\E"
+      },
+      {
+        "pattern": "\\Qjava.logging/logging.properties\\E"
+      }
+    ]
+  },
+  "bundles": []
+}
