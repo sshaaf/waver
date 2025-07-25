@@ -25,6 +25,7 @@ Waver is a command-line tool that generates code tutorials from source code usin
 - Java 21 or higher
 - Gradle 8.0 or higher
 - An API key for OpenAI or Gemini
+- Git (required for --github-url feature)
 
 ### Building from Source
 
@@ -45,13 +46,20 @@ For more detailed build instructions, including native compilation, see [Develop
 
 ### Basic Usage
 
+#### From Local Directory
 ```
 waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI
 ```
 
+#### From GitHub Repository
+```
+waver --github-url https://github.com/user/repo --output ./tutorials --project-name "My Project" --llm-provider OpenAI
+```
+
 ### Command-Line Options
 
-- `--input <path>`: The path to the source code files to analyze (required)
+- `--input <path>`: The path to the source code files to analyze (required unless --github-url is provided)
+- `--github-url <url>`: GitHub repository URL to analyze. The repository will be cloned automatically (required unless --input is provided)
 - `--output <directory>`: The directory where generated markdown files will be stored (required)
 - `--project-name <n>`: The name of the project (required)
 - `--llm-provider <provider>`: The LLM provider to use (OpenAI, Gemini)
@@ -67,16 +75,30 @@ waver --input ./my-project --output ./tutorials --project-name "My Project" --ll
 
 ## Examples
 
-### Generate a Tutorial with OpenAI
+### Generate a Tutorial from Local Code
 
 ```
 waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI
+```
+
+### Generate a Tutorial from GitHub Repository
+
+```
+waver --github-url https://github.com/spring-projects/spring-petclinic --output ./tutorials --project-name "Spring PetClinic" --llm-provider OpenAI
 ```
 
 ### Generate a Tutorial with HTML Output
 
 ```
 waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI --format HTML
+```
+
+### Generate from Private Repository
+
+For private repositories, ensure you have Git configured with appropriate credentials:
+
+```
+waver --github-url https://github.com/myorg/private-repo --output ./tutorials --project-name "Private Project" --llm-provider Gemini
 ```
 
 ## Documentation

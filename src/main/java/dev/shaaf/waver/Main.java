@@ -11,6 +11,8 @@ import dev.shaaf.waver.model.*;
 import dev.shaaf.waver.steps.*;
 import dev.shaaf.waver.util.FormatConverter;
 import dev.shaaf.waver.util.FormatConverter.OutputFormat;
+import dev.shaaf.waver.util.GitHubRepoFetcher;
+import dev.shaaf.waver.util.GitHubUrlParser;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -50,6 +52,9 @@ import java.util.stream.Collectors;
                 @|fg(green)  waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI|@
                   Generate a tutorial for "My Project" using OpenAI
                   
+                @|fg(green)  waver --github-url https://github.com/user/repo --output ./tutorials --project-name "My Project" --llm-provider OpenAI|@
+                  Generate a tutorial from a GitHub repository
+                  
                 @|fg(green)  waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini --verbose|@
                   Generate a tutorial with verbose logging using Gemini
                 """
@@ -61,10 +66,17 @@ public class Main implements Callable<Integer> {
 
     @Option(
             names = "--input", 
-            required = true, 
-            description = "The path to the source code files to analyze. Can be a directory or a specific file.",
+            required = false, 
+            description = "The path to the source code files to analyze. Can be a directory or a specific file. Required unless --github-url is provided.",
             paramLabel = "<path>")
     private File inputPath;
+    
+    @Option(
+            names = "--github-url",
+            required = false,
+            description = "GitHub repository URL to analyze. The repository will be cloned to a temporary directory. Example: https://github.com/user/repo",
+            paramLabel = "<url>")
+    private String githubUrl;
 
     @Option(
             names = "--output", 
@@ -124,11 +136,20 @@ public class Main implements Callable<Integer> {
 
         try {
             // Check if required options are set
-            if (inputPath == null) {
+            if (inputPath == null && githubUrl == null) {
                 throw new IllegalArgumentException(
                     CommandLine.Help.Ansi.AUTO.string(
-                        "@|fg(red),bold ERROR:|@ Input path is required.\n" +
-                        "@|fg(yellow) Suggestion:|@ Specify the input path with --input <path>"
+                        "@|fg(red),bold ERROR:|@ Either input path or GitHub URL is required.\n" +
+                        "@|fg(yellow) Suggestion:|@ Specify the input path with --input <path> or GitHub URL with --github-url <url>"
+                    )
+                );
+            }
+            
+            if (inputPath != null && githubUrl != null) {
+                throw new IllegalArgumentException(
+                    CommandLine.Help.Ansi.AUTO.string(
+                        "@|fg(red),bold ERROR:|@ Cannot specify both --input and --github-url.\n" +
+                        "@|fg(yellow) Suggestion:|@ Use either --input <path> OR --github-url <url>, not both"
                     )
                 );
             }
@@ -161,15 +182,67 @@ public class Main implements Callable<Integer> {
                 );
             }
 
-            // Validate input path exists
-            if (!inputPath.exists()) {
-                throw new IllegalArgumentException(
-                    CommandLine.Help.Ansi.AUTO.string(
-                        "@|fg(red),bold ERROR:|@ Input path does not exist: " + inputPath.getAbsolutePath() + "\n" +
-                        "@|fg(yellow) Suggestion:|@ Check that the path is correct and try again.\n" +
-                        "  Example: --input ./my-project"
-                    )
-                );
+            // Handle GitHub URL if provided
+            if (githubUrl != null) {
+                // Validate GitHub URL
+                if (!GitHubUrlParser.isValidGitHubUrl(githubUrl)) {
+                    throw new IllegalArgumentException(
+                        CommandLine.Help.Ansi.AUTO.string(
+                            "@|fg(red),bold ERROR:|@ Invalid GitHub URL: " + githubUrl + "\n" +
+                            "@|fg(yellow) Suggestion:|@ Provide a valid GitHub repository URL.\n" +
+                            "  Example: --github-url https://github.com/user/repo"
+                        )
+                    );
+                }
+                
+                // Check if git is available
+                if (!GitHubRepoFetcher.isGitAvailable()) {
+                    throw new IllegalArgumentException(
+                        CommandLine.Help.Ansi.AUTO.string(
+                            "@|fg(red),bold ERROR:|@ Git is not installed or not available in PATH.\n" +
+                            "@|fg(yellow) Suggestion:|@ Install Git from https://git-scm.com/ and ensure it's in your PATH."
+                        )
+                    );
+                }
+                
+                logger.info("Cloning GitHub repository: " + githubUrl);
+                try {
+                    Path clonedPath = GitHubRepoFetcher.fetchRepository(githubUrl, outputPath.toPath());
+                    inputPath = clonedPath.toFile();
+                    logger.info("Repository cloned successfully to: " + inputPath.getAbsolutePath());
+                } catch (IOException e) {
+                    String errorMessage = e.getMessage();
+                    // Extract git output if available
+                    String gitOutput = "";
+                    if (errorMessage != null && errorMessage.contains("Output:")) {
+                        int outputIndex = errorMessage.indexOf("Output:");
+                        gitOutput = "\n@|fg(cyan) Git output:|@\n" + errorMessage.substring(outputIndex + 7).trim();
+                    }
+                    
+                    throw new IllegalArgumentException(
+                        CommandLine.Help.Ansi.AUTO.string(
+                            "@|fg(red),bold ERROR:|@ Failed to clone repository: " + githubUrl + "\n" +
+                            "@|fg(red) Details:|@ " + (errorMessage != null ? errorMessage.split("\\.")[0] : "Unknown error") + 
+                            gitOutput + "\n" +
+                            "@|fg(yellow) Suggestions:|@\n" +
+                            "  1. Check your internet connection\n" +
+                            "  2. Verify the repository URL is correct\n" +
+                            "  3. For private repos, ensure git credentials are configured\n" +
+                            "  4. Try cloning manually: git clone " + githubUrl
+                        )
+                    );
+                }
+            } else {
+                // Validate input path exists (only if not using GitHub URL)
+                if (!inputPath.exists()) {
+                    throw new IllegalArgumentException(
+                        CommandLine.Help.Ansi.AUTO.string(
+                            "@|fg(red),bold ERROR:|@ Input path does not exist: " + inputPath.getAbsolutePath() + "\n" +
+                            "@|fg(yellow) Suggestion:|@ Check that the path is correct and try again.\n" +
+                            "  Example: --input ./my-project"
+                        )
+                    );
+                }
             }
 
             // Validate output path
@@ -219,7 +292,12 @@ public class Main implements Callable<Integer> {
             if (verbose) {
                 e.printStackTrace();
             } else {
-                logger.severe(e.getMessage());
+                // For IllegalArgumentException, the message is already formatted
+                if (e instanceof IllegalArgumentException) {
+                    System.err.println(e.getMessage());
+                } else {
+                    logger.severe(e.getMessage());
+                }
             }
             return 1; // Return error code instead of System.exit
         }

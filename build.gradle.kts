@@ -100,6 +100,26 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
+// Create a fat JAR with all dependencies
+tasks.register<Jar>("fatJar") {
+    description = "Create a fat JAR with all dependencies"
+    group = "build"
+    
+    archiveClassifier.set("all")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    manifest {
+        attributes["Main-Class"] = "dev.shaaf.waver.Main"
+    }
+    
+    from(sourceSets.main.get().output)
+    
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
+}
+
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
