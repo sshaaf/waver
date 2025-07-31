@@ -12,7 +12,7 @@ Waver is a command-line tool that generates code tutorials from source code usin
 
 - Analyzes source code to identify abstractions and relationships
 - Generates structured tutorials with chapters
-- Supports multiple LLM providers (OpenAI, Gemini)
+- Supports multiple LLM providers (Gemini, OpenAI)
 - Colorized output for better readability
 - Progress indicators for long-running operations
 - Multiple output formats (Markdown, HTML, PDF)
@@ -24,8 +24,7 @@ Waver is a command-line tool that generates code tutorials from source code usin
 
 - Java 21 or higher
 - Gradle 8.0 or higher
-- An API key for OpenAI or Gemini
-- Git (required for --github-url feature)
+- An API key for Gemini or OpenAI
 
 ### Building from Source
 
@@ -48,18 +47,17 @@ For more detailed build instructions, including native compilation, see [Develop
 
 #### From Local Directory
 ```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI
+waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini
 ```
 
 #### From GitHub Repository
 ```
-waver --github-url https://github.com/user/repo --output ./tutorials --project-name "My Project" --llm-provider OpenAI
+waver --input https://github.com/user/repo.git --output ./tutorials --project-name "My Project" --llm-provider Gemini
 ```
 
 ### Command-Line Options
 
-- `--input <path>`: The path to the source code files to analyze (required unless --github-url is provided)
-- `--github-url <url>`: GitHub repository URL to analyze. The repository will be cloned automatically (required unless --input is provided)
+- `--input <path>`: The path to the source code files to analyze (required)
 - `--output <directory>`: The directory where generated markdown files will be stored (required)
 - `--project-name <n>`: The name of the project (required)
 - `--llm-provider <provider>`: The LLM provider to use (OpenAI, Gemini)
@@ -75,30 +73,16 @@ waver --github-url https://github.com/user/repo --output ./tutorials --project-n
 
 ## Examples
 
-### Generate a Tutorial from Local Code
+### Generate a Tutorial from Local Code or Git url
 
 ```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI
-```
-
-### Generate a Tutorial from GitHub Repository
-
-```
-waver --github-url https://github.com/spring-projects/spring-petclinic --output ./tutorials --project-name "Spring PetClinic" --llm-provider OpenAI
+waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini
 ```
 
 ### Generate a Tutorial with HTML Output
 
 ```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI --format HTML
-```
-
-### Generate from Private Repository
-
-For private repositories, ensure you have Git configured with appropriate credentials:
-
-```
-waver --github-url https://github.com/myorg/private-repo --output ./tutorials --project-name "Private Project" --llm-provider Gemini
+waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini --format HTML
 ```
 
 ## Documentation
