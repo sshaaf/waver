@@ -1,4 +1,4 @@
-package dev.shaaf.waver.steps;
+package dev.shaaf.waver.files;
 
 import dev.shaaf.waver.model.CodeFile;
 
@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class FetchRepo {
+
     public static List<CodeFile> crawl(String rootDirectory) throws IOException {
         List<Path> files = new ArrayList<>();
         Files.walkFileTree(Paths.get(rootDirectory), new SimpleFileVisitor<>() {
