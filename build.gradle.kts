@@ -33,7 +33,10 @@ dependencies {
     // Jackson for JSON and YAML processing
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.16.1")
-    
+
+    // JGit
+    implementation("org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r")
+
     // Flexmark for Markdown processing and format conversion
     implementation("com.vladsch.flexmark:flexmark:0.64.8")
     implementation("com.vladsch.flexmark:flexmark-util:0.64.8")
@@ -98,6 +101,26 @@ graalvmNative {
 tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests
     useJUnitPlatform()
+}
+
+// Create a fat JAR with all dependencies
+tasks.register<Jar>("fatJar") {
+    description = "Create a fat JAR with all dependencies"
+    group = "build"
+    
+    archiveClassifier.set("all")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    manifest {
+        attributes["Main-Class"] = "dev.shaaf.waver.Main"
+    }
+    
+    from(sourceSets.main.get().output)
+    
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
 }
 
 tasks.withType<JavaCompile>().configureEach {

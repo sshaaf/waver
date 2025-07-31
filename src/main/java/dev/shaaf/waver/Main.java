@@ -4,6 +4,7 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.shaaf.waver.config.AppConfig;
 import dev.shaaf.waver.config.MissingConfigurationException;
 import dev.shaaf.waver.config.ProviderConfig;
+import dev.shaaf.waver.files.FileInputHandler;
 import dev.shaaf.waver.llm.LLMProvider;
 import dev.shaaf.waver.llm.ModelProviderFactory;
 import dev.shaaf.waver.log.LogConfig;
@@ -61,10 +62,10 @@ public class Main implements Callable<Integer> {
 
     @Option(
             names = "--input", 
-            required = true, 
+            required = true,
             description = "The path to the source code files to analyze. Can be a directory or a specific file.",
             paramLabel = "<path>")
-    private File inputPath;
+    private String inputPath;
 
     @Option(
             names = "--output", 
@@ -161,17 +162,6 @@ public class Main implements Callable<Integer> {
                 );
             }
 
-            // Validate input path exists
-            if (!inputPath.exists()) {
-                throw new IllegalArgumentException(
-                    CommandLine.Help.Ansi.AUTO.string(
-                        "@|fg(red),bold ERROR:|@ Input path does not exist: " + inputPath.getAbsolutePath() + "\n" +
-                        "@|fg(yellow) Suggestion:|@ Check that the path is correct and try again.\n" +
-                        "  Example: --input ./my-project"
-                    )
-                );
-            }
-
             // Validate output path
             if (outputPath.exists() && !outputPath.isDirectory()) {
                 throw new IllegalArgumentException(
@@ -214,7 +204,7 @@ public class Main implements Callable<Integer> {
                 );
             }
 
-            appConfig = new AppConfig(inputPath.getAbsolutePath(), outputPath.getAbsolutePath(), llmProvider, providerConfig.getApiKey(), verbose, projectName, outputFormat);
+            appConfig = new AppConfig(inputPath, outputPath.getAbsolutePath(), llmProvider, providerConfig.getApiKey(), verbose, projectName, outputFormat);
         } catch (Exception e) {
             if (verbose) {
                 e.printStackTrace();
@@ -265,7 +255,7 @@ public class Main implements Callable<Integer> {
                   - @|bold LLM Credentials      :|@ @|yellow Found|@
                 --------------------------------------------------""".formatted(
                 appConfig.projectName(),
-                appConfig.absoluteInputPath(),
+                appConfig.inputPath(),
                 appConfig.absoluteOutputPath(),
                 appConfig.llmProvider()
         );
@@ -337,7 +327,7 @@ public class Main implements Callable<Integer> {
 
         ChatModel model = ModelProviderFactory.buildChatModel(appConfig.llmProvider(), appConfig.apiKey());
 
-        logger.info("🚀 Starting Tutorial Generation for: " + appConfig.absoluteInputPath());
+        logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
 
         // This map will hold the state and pass data between steps
         Map<String, Object> shared = new HashMap<>();
@@ -346,7 +336,7 @@ public class Main implements Callable<Integer> {
             // Step A: Fetch Repo
             logger.info("\n[1/6] 📂 Fetching repository files...");
             
-            List<CodeFile> codeFiles = FetchRepo.crawl(appConfig.absoluteInputPath());
+            List<CodeFile> codeFiles = FileInputHandler.crawl(appConfig.inputPath());
             shared.put("codeFiles", codeFiles);
             logger.info("   > Found " + codeFiles.size() + " code files.");
 

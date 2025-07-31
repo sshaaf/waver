@@ -12,7 +12,7 @@ Waver is a command-line tool that generates code tutorials from source code usin
 
 - Analyzes source code to identify abstractions and relationships
 - Generates structured tutorials with chapters
-- Supports multiple LLM providers (OpenAI, Gemini)
+- Supports multiple LLM providers (Gemini, OpenAI)
 - Colorized output for better readability
 - Progress indicators for long-running operations
 - Multiple output formats (Markdown, HTML, PDF)
@@ -24,7 +24,7 @@ Waver is a command-line tool that generates code tutorials from source code usin
 
 - Java 21 or higher
 - Gradle 8.0 or higher
-- An API key for OpenAI or Gemini
+- An API key for Gemini or OpenAI
 
 ### Building from Source
 
@@ -45,8 +45,14 @@ For more detailed build instructions, including native compilation, see [Develop
 
 ### Basic Usage
 
+#### From Local Directory
 ```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI
+waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini
+```
+
+#### From GitHub Repository
+```
+waver --input https://github.com/user/repo.git --output ./tutorials --project-name "My Project" --llm-provider Gemini
 ```
 
 ### Command-Line Options
@@ -67,16 +73,16 @@ waver --input ./my-project --output ./tutorials --project-name "My Project" --ll
 
 ## Examples
 
-### Generate a Tutorial with OpenAI
+### Generate a Tutorial from Local Code or Git url
 
 ```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI
+waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini
 ```
 
 ### Generate a Tutorial with HTML Output
 
 ```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI --format HTML
+waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini --format HTML
 ```
 
 ## Documentation
