@@ -1,15 +1,14 @@
 package dev.shaaf.waver.util;
 
 import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
 import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.pdf.converter.PdfConverterExtension;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Logger;
 

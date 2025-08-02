@@ -4,29 +4,22 @@ import dev.langchain4j.model.chat.ChatModel;
 import dev.shaaf.waver.config.AppConfig;
 import dev.shaaf.waver.config.MissingConfigurationException;
 import dev.shaaf.waver.config.ProviderConfig;
-import dev.shaaf.waver.files.FileInputHandler;
-import dev.shaaf.waver.llm.LLMProvider;
-import dev.shaaf.waver.llm.ModelProviderFactory;
-import dev.shaaf.waver.log.LogConfig;
-import dev.shaaf.waver.model.*;
-import dev.shaaf.waver.steps.*;
-import dev.shaaf.waver.util.FormatConverter;
+import dev.shaaf.waver.core.TaskPipeline;
+import dev.shaaf.waver.config.llm.LLMProvider;
+import dev.shaaf.waver.config.llm.ModelProviderFactory;
+import dev.shaaf.waver.tutorial.task.*;
+import dev.shaaf.waver.util.log.LogConfig;
 import dev.shaaf.waver.util.FormatConverter.OutputFormat;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Main application class for Waver.
@@ -246,7 +239,7 @@ public class Main implements Callable<Integer> {
     private static String picoColors(AppConfig appConfig) {
         String styledMessage = """
                 
-                @|fg(green) ✅ All checks passed. 
+                @|fg(green) ✅ All checks passed.
                 🌟Starting generator with the following configuration:|@
                   - @|bold Project Name         :|@ @|yellow %s|@
                   - @|bold Input Path           :|@ @|yellow %s|@
@@ -325,94 +318,21 @@ public class Main implements Callable<Integer> {
      */
     public static void generate(AppConfig appConfig) {
 
-        ChatModel model = ModelProviderFactory.buildChatModel(appConfig.llmProvider(), appConfig.apiKey());
+        ChatModel chatModel = ModelProviderFactory.buildChatModel(appConfig.llmProvider(), appConfig.apiKey());
+        Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" + appConfig.llmProvider().name().toLowerCase() + "/" + appConfig.projectName() + "/" + System.currentTimeMillis());
+
+
+        TaskPipeline tasksPipeLine = new TaskPipeline();
+        tasksPipeLine.add(new CodeCrawlerTask())
+                .then(new IdentifyAbstractionsTask(chatModel, appConfig.projectName()))
+                .then(new IdentifyRelationshipsTask(chatModel, appConfig.projectName()))
+                .then(new ChapterOrganizerTask(chatModel))
+                .then(new TechnicalWriterTask(chatModel, outputDir));
 
         logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
+        String finalOutput = tasksPipeLine.run(appConfig.inputPath());
+        logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
 
-        // This map will hold the state and pass data between steps
-        Map<String, Object> shared = new HashMap<>();
-
-        try {
-            // Step A: Fetch Repo
-            logger.info("\n[1/6] 📂 Fetching repository files...");
-            
-            List<CodeFile> codeFiles = FileInputHandler.crawl(appConfig.inputPath());
-            shared.put("codeFiles", codeFiles);
-            logger.info("   > Found " + codeFiles.size() + " code files.");
-
-            String codebaseAsString = codeFiles.stream()
-                    .map(file -> "--- File: " + file.path() + " ---\n" + file.content())
-                    .collect(Collectors.joining("\n\n"));
-
-            // Step B: Identify Abstractions
-            logger.info("[2/6] 🧠 Identifying abstractions...");
-            
-            AbstractionList abstractionList = IdentifyAbstractions.find(codebaseAsString, model, appConfig.projectName());
-            
-            shared.put("abstractions", abstractionList);
-            logger.info("   > Identified " + abstractionList.abstractions().size() + " abstractions.");
-
-            String abstractionsAsString = abstractionList.abstractions().stream()
-                    .map(Abstraction::name)
-                    .collect(Collectors.joining(", "));
-
-            // Step C: Analyze Relationships
-            logger.info("[3/6] 🔗 Analyzing relationships...");
-            
-            RelationshipAnalysis relationships = IdentifyRelationships.find(codebaseAsString, abstractionsAsString, model, appConfig.projectName());
-            
-            shared.put("relationships", relationships);
-            logger.info("   > " + relationships.summary());
-
-            // Step D: Order Chapters
-            logger.info("[4/6] 📑 Ordering chapters...");
-            
-            ChapterList chapterOrder = ChapterOrganizer.find(abstractionsAsString, model);
-            
-            shared.put("chapter_order", chapterOrder);
-            logger.info("   > Chapter order determined: " + chapterOrder.toString());
-
-            // Step E: Write Chapters
-            logger.info("[5/6] ✍️ Writing chapters...");
-            
-            List<String> chapters = TechnicalWriter.build(codeFiles, chapterOrder.chapterList(), abstractionList, model);
-            
-            shared.put("chapters", chapters);
-            logger.info("   > All " + chapters.size() + " chapters written.");
-
-            // Step F: Combine Tutorial
-            logger.info("[6/6] 📦 Combining tutorial into final output...");
-            
-            Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" + appConfig.llmProvider().name().toLowerCase() + "/" + appConfig.projectName() + "/" + System.currentTimeMillis());
-            String introChapter = IntroBuilder.write(codebaseAsString, abstractionList, model);
-            CombineTutorial.build(outputDir, chapters, chapterOrder.chapterList(), relationships, introChapter);
-            
-            shared.put("final_output_dir", outputDir);
-
-            logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
-
-            // Convert output to the selected format if not Markdown
-            if (appConfig.outputFormat() != OutputFormat.MARKDOWN) {
-                logger.info("\n🔄 Converting output to " + appConfig.outputFormat() + " format...");
-                
-                try {
-                    // Convert all markdown files in the output directory
-                    int count = FormatConverter.convertDirectory(outputDir.toFile(), appConfig.outputFormat());
-                    
-                    logger.info("\n✅ Conversion complete! " + count + " files converted to " + appConfig.outputFormat() + " format.");
-                } catch (IOException e) {
-                    logger.severe("\n❌ An error occurred during format conversion: " + e.getMessage());
-                    if (appConfig.verbose()) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            logger.severe("\n❌ An error occurred during tutorial generation:");
-            if (appConfig.verbose())
-                e.printStackTrace();
-        }
     }
 
 

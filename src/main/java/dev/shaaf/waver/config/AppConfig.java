@@ -1,6 +1,6 @@
 package dev.shaaf.waver.config;
 
-import dev.shaaf.waver.llm.LLMProvider;
+import dev.shaaf.waver.config.llm.LLMProvider;
 import dev.shaaf.waver.util.FormatConverter.OutputFormat;
 
 /**
