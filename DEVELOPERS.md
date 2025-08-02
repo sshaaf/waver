@@ -174,15 +174,16 @@ This ensures that all code changes pass tests before being merged, maintaining c
 Waver is organized into several key packages:
 
 - `dev.shaaf.waver`: Main package containing the application entry point
+- `dev.shaaf.waver.core`: core framework such as Task, Pipeline
 - `dev.shaaf.waver.config`: Configuration classes for the application
-- `dev.shaaf.waver.llm`: Classes for interacting with LLM providers
-- `dev.shaaf.waver.log`: Logging utilities
-- `dev.shaaf.waver.model`: Data models for abstractions, relationships, and chapters
-- `dev.shaaf.waver.prompts`: Classes for generating prompts for the LLM
-- `dev.shaaf.waver.steps`: Pipeline steps for generating tutorials
+- `dev.shaaf.waver.config.llm`: Classes for interacting with LLM providers
+- `dev.shaaf.waver.util.log`: Logging utilities
+- `dev.shaaf.waver.tutorial.model`: Data models for abstractions, relationships, and chapters
+- `dev.shaaf.waver.tutorial.prompt`: Classes for generating prompts for the LLM
+- `dev.shaaf.waver.tutorial.task`: Pipeline tasks for generating tutorials
 - `dev.shaaf.waver.util`: Utility classes
 
-The application follows a pipeline architecture where each step in the tutorial generation process is handled by a separate class in the `steps` package.
+The application follows a pipeline architecture where each step in the tutorial generation process is handled by a separate class in the `task` package.
 
 ## License
 
