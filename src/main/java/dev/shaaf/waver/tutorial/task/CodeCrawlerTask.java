@@ -24,8 +24,9 @@ public class CodeCrawlerTask implements Task<String, GenerationContext> {
 
         if(inputType == InputType.GIT_URL){
             try {
-                return new GenerationContext(FetchRepo.crawl(GitHubRepoFetcher.getRepositoryName(inputString)), null, null, null);
+                return new GenerationContext(FetchRepo.crawl(GitHubRepoFetcher.getAndCloneRepo(inputString)), null, null, null);
             } catch (IOException e) {
+                e.printStackTrace();
                 throw new TaskRunException(e);
             }
         }

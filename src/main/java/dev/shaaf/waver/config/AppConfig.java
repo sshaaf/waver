@@ -26,4 +26,11 @@ public record AppConfig(
         boolean verbose,
         String projectName,
         OutputFormat outputFormat
-) {}
+) {
+
+    public static final String DEFAULT_GITHUB_CLONE_PATH = System.getProperty("user.dir")+"/waver-git-clone/";
+    public static final String DEFAULT_OUTPUT_PATH = "output";
+    public static final String DEFAULT_PROJECT_NAME = "Wavers";
+    public static final OutputFormat DEFAULT_OUTPUT_FORMAT = OutputFormat.MARKDOWN;
+
+}

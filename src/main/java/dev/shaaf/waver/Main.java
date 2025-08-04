@@ -319,7 +319,7 @@ public class Main implements Callable<Integer> {
     public static void generate(AppConfig appConfig) {
 
         ChatModel chatModel = ModelProviderFactory.buildChatModel(appConfig.llmProvider(), appConfig.apiKey());
-        Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" + appConfig.llmProvider().name().toLowerCase() + "/" + appConfig.projectName() + "/" + System.currentTimeMillis());
+        Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" +appConfig.projectName());
 
 
         TaskPipeline tasksPipeLine = new TaskPipeline();
