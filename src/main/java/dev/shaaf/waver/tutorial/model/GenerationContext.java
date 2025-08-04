@@ -8,23 +8,29 @@ public record GenerationContext(
         List<CodeFile> codeFiles,
         AbstractionList abstractions,
         RelationshipAnalysis relationshipAnalysis,
-        ChapterList chapterList
+        ChapterList chapterList,
+        TutorialMetadata metadata
 ) {
 
+
     public GenerationContext withCodeFiles(List<CodeFile> codeFiles) {
-        return new GenerationContext(codeFiles, this.abstractions, this.relationshipAnalysis, this.chapterList);
+        return new GenerationContext(codeFiles, this.abstractions, this.relationshipAnalysis, this.chapterList, this.metadata);
+    }
+
+    public GenerationContext withTutorialMetadata(TutorialMetadata metadata) {
+        return new GenerationContext(this.codeFiles, this.abstractions, this.relationshipAnalysis, this.chapterList, metadata);
     }
 
     public GenerationContext withAbstractions(AbstractionList abstractions) {
-        return new GenerationContext(this.codeFiles, abstractions, this.relationshipAnalysis, this.chapterList);
+        return new GenerationContext(this.codeFiles, abstractions, this.relationshipAnalysis, this.chapterList, this.metadata);
     }
 
     public GenerationContext withRelationshipAnalysis(RelationshipAnalysis relationshipAnalysis) {
-        return new GenerationContext(this.codeFiles, this.abstractions, relationshipAnalysis, this.chapterList);
+        return new GenerationContext(this.codeFiles, this.abstractions, relationshipAnalysis, this.chapterList, this.metadata);
     }
 
     public GenerationContext withChapterList(ChapterList chapterList) {
-        return new GenerationContext(this.codeFiles, this.abstractions, this.relationshipAnalysis, chapterList);
+        return new GenerationContext(this.codeFiles, this.abstractions, this.relationshipAnalysis, chapterList, this.metadata);
     }
 
 
