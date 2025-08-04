@@ -319,15 +319,17 @@ public class Main implements Callable<Integer> {
     public static void generate(AppConfig appConfig) {
 
         ChatModel chatModel = ModelProviderFactory.buildChatModel(appConfig.llmProvider(), appConfig.apiKey());
-        Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" + appConfig.llmProvider().name().toLowerCase() + "/" + appConfig.projectName() + "/" + System.currentTimeMillis());
+        Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" +appConfig.projectName());
 
 
+        // TODO: Consider passing AppConfig into the constructor so shared config is simplified across tasks.
         TaskPipeline tasksPipeLine = new TaskPipeline();
         tasksPipeLine.add(new CodeCrawlerTask())
                 .then(new IdentifyAbstractionsTask(chatModel, appConfig.projectName()))
                 .then(new IdentifyRelationshipsTask(chatModel, appConfig.projectName()))
                 .then(new ChapterOrganizerTask(chatModel))
-                .then(new TechnicalWriterTask(chatModel, outputDir));
+                .then(new TechnicalWriterTask(chatModel, outputDir))
+                .then(new MetaInfoTask(chatModel, outputDir, appConfig.projectName(), appConfig.inputPath()));
 
         logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
         String finalOutput = tasksPipeLine.run(appConfig.inputPath());

@@ -12,7 +12,7 @@ public class TaskPipeline {
 
     public TaskPipeline add(Task<?, ?> task) {
         String taskName = task.getName();
-        System.out.println("ADDING: " + taskName); // <-- Add this line
+        System.out.println("ADDING: " + taskName);
         if (tasks.containsKey(taskName)) {
             throw new IllegalArgumentException("Task '" + taskName + "' has already been added.");
         }

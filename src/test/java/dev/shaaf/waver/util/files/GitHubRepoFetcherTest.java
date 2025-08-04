@@ -1,6 +1,5 @@
 package dev.shaaf.waver.util.files;
 
-import dev.shaaf.waver.util.files.GitHubRepoFetcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +50,7 @@ class GitHubRepoFetcherTest {
     void getRepositoryName_withValidPublicRepository_clonesSuccessfully() {
         assertDoesNotThrow(() -> {
             // Act: Call the method with a real Git URL
-            String result = GitHubRepoFetcher.getRepositoryName(VALID_PUBLIC_REPO_URL);
+            String result = GitHubRepoFetcher.getAndCloneRepo(VALID_PUBLIC_REPO_URL);
 
             // Assert
             assertEquals("tmp", result, "The method should return the name of the created directory.");
@@ -68,17 +67,24 @@ class GitHubRepoFetcherTest {
         // JGit throws a TransportException (subclass of GitAPIException) for a non-existent repo,
         // which the original code wraps in a RuntimeException.
         assertThrows(RuntimeException.class, () -> {
-            GitHubRepoFetcher.getRepositoryName(NON_EXISTENT_REPO_URL);
+            GitHubRepoFetcher.getAndCloneRepo(NON_EXISTENT_REPO_URL);
         }, "Cloning a non-existent repository should throw a RuntimeException.");
     }
 
     @Test
     @DisplayName("Should throw an exception when the URL is null")
-    void getRepositoryName_withNullUrl_throwsException() {
+    void getAndCloneRepo_withNullUrl_throwsException() {
         // Act & Assert
         // The underlying JGit library will throw an exception if the URI is null.
         assertThrows(RuntimeException.class, () -> {
-            GitHubRepoFetcher.getRepositoryName(null);
+            GitHubRepoFetcher.getAndCloneRepo(null);
         }, "A null URL should cause an exception.");
+    }
+
+    @Test
+    @DisplayName("Should successfully check a valid public repository and return the user/repo name without git")
+    void getNameFromRemoteURL() {
+        assertEquals("sshaaf/keycloak-mcp-server", GitHubRepoFetcher.getNameFromRemoteURL("https://github.com/sshaaf/keycloak-mcp-server.git"));
+
     }
 }

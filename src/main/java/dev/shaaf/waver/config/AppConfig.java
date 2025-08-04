@@ -26,4 +26,9 @@ public record AppConfig(
         boolean verbose,
         String projectName,
         OutputFormat outputFormat
-) {}
+) {
+
+    public static final String DEFAULT_GITHUB_CLONE_PATH = System.getProperty("user.dir")+"/waver-git-clone/";
+
+
+}

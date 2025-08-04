@@ -17,7 +17,7 @@ import java.nio.file.Path;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class TechnicalWriterTask implements Task<GenerationContext, String> {
+public class TechnicalWriterTask implements Task<GenerationContext, GenerationContext> {
     // Get a logger instance for this class
     private static final Logger logger = Logger.getLogger(TechnicalWriterTask.class.getName());
 
@@ -30,7 +30,7 @@ public class TechnicalWriterTask implements Task<GenerationContext, String> {
     }
 
     @Override
-    public String execute(GenerationContext generationContext, PipelineContext context) throws TaskRunException {
+    public GenerationContext execute(GenerationContext generationContext, PipelineContext context) throws TaskRunException {
 
         try{
             Files.createDirectories(outputDir);
@@ -48,7 +48,7 @@ public class TechnicalWriterTask implements Task<GenerationContext, String> {
             writeChapterToDisk(outputDir, "index.md", introChapterContent.toString());
             logger.info("✅ Tutorial generated at: " + outputDir.toAbsolutePath());
 
-            return "All is well, that ends well!";
+            return generationContext;
         } catch (IOException e) {
             throw new TaskRunException(e);
         }
