@@ -79,7 +79,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: waver-linux
-          path: build/native/waver
+          path: build/native/nativeCompile
 
   native-macos:
     name: Build Native macOS (Apple Silicon)
@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: waver-macos
-          path: build/native/waver
+          path: build/native/nativeCompile
 
   native-windows:
     name: Build Native Windows
@@ -130,7 +130,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: waver-windows
-          path: build/native/waver.exe
+          path: build/native/nativeCompile/waver.exe
 
 #  release:
 #    name: Create Release
