@@ -16,7 +16,9 @@ dependencies {
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-smallrye-health")
     implementation("io.quarkus:quarkus-funqy-http") // The duplicate line was removed
-    implementation("io.quarkus:quarkus-funqy-knative-events-deployment:3.23.0")
+    implementation("io.quarkus:quarkus-funqy-knative-events")
+    implementation("io.quarkus:quarkus-messaging")
+
 
     // Test dependencies
     testImplementation("io.quarkus:quarkus-junit5")

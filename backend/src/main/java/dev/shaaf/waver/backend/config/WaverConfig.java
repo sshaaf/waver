@@ -9,7 +9,7 @@ import java.util.Optional;
 @ApplicationScoped
 @ConfigMapping(prefix = "waver")
 public interface WaverConfig {
-    LLMProvider LLMProvider();
+    LLMProvider llmProvider();
     String outputPath();;
     String projectName();;
     boolean verbose();;
@@ -17,10 +17,12 @@ public interface WaverConfig {
     OpenAI openai();;
     Gemini gemini();;
 
-    public static class OpenAI {
-        public Optional<String> apiKey;
+    // This is now also a config mapping interface
+    interface OpenAI {
+        Optional<String> apiKey();
     }
-    public static class Gemini {
-        public Optional<String> apiKey;
+    // This is now also a config mapping interface
+    interface Gemini {
+        Optional<String> apiKey();
     }
 }

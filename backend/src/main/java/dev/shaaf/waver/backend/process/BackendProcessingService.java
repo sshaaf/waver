@@ -15,10 +15,14 @@ import dev.shaaf.waver.tutorial.task.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.reactive.messaging.Incoming;
+import org.jetbrains.annotations.Blocking;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.logging.Logger;
 
 @ApplicationScoped
@@ -29,11 +33,13 @@ public class BackendProcessingService {
 
     private static final Logger logger = Logger.getLogger(BackendProcessingService.class.getName());
 
-    public void initAndRunPipeline(@ObservesAsync WaverProcessEvent event) {
+    @Incoming("requests")
+    public CompletionStage<Void> initAndRunPipeline(WaverProcessEvent event) {
         logger.info("🚀 Event is invoked, starting my business: " + event.sourceUrl());
-        generate(event.sourceUrl());
-        logger.info("🚀 My business has ended. Good bye! " + event.sourceUrl());
-
+        return CompletableFuture.runAsync(() -> {
+            generate(event.sourceUrl());
+            logger.info("🚀 My business has ended. Good bye! " + event.sourceUrl());
+        });
     }
 
     public void generate(String inputPath) {
@@ -46,7 +52,7 @@ public class BackendProcessingService {
                 new AppConfig(
                         inputPath,
                         getAbsolutePath(waverConfig.outputPath()),
-                        waverConfig.LLMProvider(),
+                        waverConfig.llmProvider(),
                         providerConfig.getApiKey(),
                         waverConfig.verbose(),
                         waverConfig.projectName(),
@@ -56,6 +62,7 @@ public class BackendProcessingService {
     public String getAbsolutePath(String path) {
         return Paths.get(path).toAbsolutePath().toString();
     }
+
 
     public static void generate(AppConfig appConfig) {
 
@@ -81,15 +88,15 @@ public class BackendProcessingService {
 
 
     public ProviderConfig getProviderConfig() {
-        LLMProvider llmProvider = waverConfig.LLMProvider();
+        LLMProvider llmProvider = waverConfig.llmProvider();
 
         return switch (llmProvider) {
             case OpenAI -> new ProviderConfig.OpenAI(
-                    waverConfig.openai().apiKey.orElseThrow(() ->
+                    waverConfig.openai().apiKey().orElseThrow(() ->
                             new MissingConfigurationException("Property 'waver.openai.api-key' was not set for OpenAI provider."))
             );
             case Gemini -> new ProviderConfig.Gemini(
-                    waverConfig.gemini().apiKey.orElseThrow(() ->
+                    waverConfig.gemini().apiKey().orElseThrow(() ->
                             new MissingConfigurationException("Property 'waver.gemini.api-key' was not set for Gemini provider."))
             );
             case null, default -> throw new MissingConfigurationException(
