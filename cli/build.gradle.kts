@@ -1,40 +1,19 @@
 plugins {
-    // Apply the application plugin to add support for building a CLI application in Java
+    // The java plugin is inherited from the root script
     application
-
-    id("org.graalvm.buildtools.native") version "0.10.2"
-}
-
-repositories {
-    // Use Maven Central for resolving dependencies
-    mavenCentral()
+    id("org.graalvm.buildtools.native")
 }
 
 dependencies {
-    // Add dependencies here if needed
-    implementation(project(":waver-core"))
-    // Langchain core
-    implementation("dev.langchain4j:langchain4j:1.0.0")
+    // Common dependencies (langchain4j, slf4j, junit) are inherited from the root
+    implementation(project(":core"))
 
-    // support gemini and OpenAI
-    implementation("dev.langchain4j:langchain4j-open-ai:1.0.0")
-    implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.0.0-beta5")
-
-    // logging
-    implementation("org.slf4j:slf4j-api:2.0.17")
-    runtimeOnly("org.slf4j:slf4j-simple:2.0.17")
-
-    // Use JUnit Jupiter for testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-
-    // Cli libs
+    // Specific dependencies for this module
     implementation("info.picocli:picocli:4.7.7")
     annotationProcessor("info.picocli:picocli-codegen:4.7.7")
 }
 
 application {
-    // Define the main class for the application
     mainClass.set("dev.shaaf.waver.cli.Main")
 }
 
@@ -54,8 +33,6 @@ graalvmNative {
     binaries {
         named("main") {
             imageName.set("waver")
-            // outputDirectory.set(file("${rootProject.buildDir}/native"))
-
             // Explicitly specify the paths to our configuration files
             configurationFileDirectories.from(file("src/main/resources/META-INF/native-image"))
 
@@ -81,11 +58,6 @@ graalvmNative {
             )
         }
     }
-}
-
-tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests
-    useJUnitPlatform()
 }
 
 // Create a fat JAR with all dependencies
