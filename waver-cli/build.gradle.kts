@@ -54,7 +54,7 @@ graalvmNative {
     binaries {
         named("main") {
             imageName.set("waver")
-            outputDirectory.set(file("${rootProject.buildDir}/native"))
+            // outputDirectory.set(file("${rootProject.buildDir}/native"))
 
             // Explicitly specify the paths to our configuration files
             configurationFileDirectories.from(file("src/main/resources/META-INF/native-image"))
