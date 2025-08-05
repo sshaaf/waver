@@ -11,4 +11,7 @@ plugins {
 }
 
 rootProject.name = "waver"
-include("app")
+
+include("waver-core")
+include("waver-cli")
+include("waver-backend")
