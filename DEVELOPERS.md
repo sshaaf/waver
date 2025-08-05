@@ -171,8 +171,13 @@ This ensures that all code changes pass tests before being merged, maintaining c
 
 ## Project Architecture
 
-Waver is organized into several key packages:
+Waver is organized into several key projects:
 
+### CLI
+- `dev.shaaf.waver.cli`: Main package containing the console application entry point
+
+### CORE
+API and core functions
 - `dev.shaaf.waver`: Main package containing the application entry point
 - `dev.shaaf.waver.core`: core framework such as Task, Pipeline
 - `dev.shaaf.waver.config`: Configuration classes for the application
@@ -183,7 +188,26 @@ Waver is organized into several key packages:
 - `dev.shaaf.waver.tutorial.task`: Pipeline tasks for generating tutorials
 - `dev.shaaf.waver.util`: Utility classes
 
+### Backend
+A REST backend using the core to generate tutorials. 
+
+
 The application follows a pipeline architecture where each step in the tutorial generation process is handled by a separate class in the `task` package.
+```java
+        TaskPipeline tasksPipeLine = new TaskPipeline();
+        tasksPipeLine.add(new CodeCrawlerTask())
+                .then(new IdentifyAbstractionsTask(chatModel, appConfig.projectName()))
+                .then(new IdentifyRelationshipsTask(chatModel, appConfig.projectName()))
+                .then(new ChapterOrganizerTask(chatModel))
+                .then(new TechnicalWriterTask(chatModel, outputDir))
+                .then(new MetaInfoTask(chatModel, outputDir, appConfig.projectName(), appConfig.inputPath()));
+
+        logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
+        String finalOutput = tasksPipeLine.run(appConfig.inputPath());
+        logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
+```
+
+
 
 ## License
 

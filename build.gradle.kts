@@ -9,18 +9,6 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    // Add dependencies here if needed
-
-    // Use JUnit Jupiter for testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-
-    implementation("info.picocli:picocli:4.7.7")
-    annotationProcessor("info.picocli:picocli-codegen:4.7.7")
-}
-
-
 java {
     // Configure the Java toolchain
     toolchain {
@@ -35,4 +23,18 @@ tasks.named<Test>("test") {
 
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+}
+
+subprojects {
+    apply(plugin = "java")
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
+    }
+
+    tasks.withType<Jar> {
+        destinationDirectory.set(file("${rootProject.buildDir}/libs"))
+    }
 }
