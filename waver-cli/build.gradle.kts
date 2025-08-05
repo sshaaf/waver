@@ -20,6 +20,10 @@ dependencies {
     implementation("dev.langchain4j:langchain4j-open-ai:1.0.0")
     implementation("dev.langchain4j:langchain4j-google-ai-gemini:1.0.0-beta5")
 
+    // logging
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    runtimeOnly("org.slf4j:slf4j-simple:2.0.17")
+
     // Use JUnit Jupiter for testing
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
@@ -61,6 +65,7 @@ graalvmNative {
                 "--initialize-at-build-time=com.fasterxml.jackson",
                 "--initialize-at-build-time=org.slf4j",
                 "--initialize-at-build-time=org.yaml.snakeyaml.util.UriEncoder",
+                "--initialize-at-build-time=org.yaml.snakeyaml.events.ImplicitTuple",
                 "--initialize-at-build-time=org.yaml.snakeyaml.external.com.google.gdata.util.common.base.UnicodeEscaper",
                 "--initialize-at-build-time=org.yaml.snakeyaml.DumperOptions\$ScalarStyle",
                 "--initialize-at-build-time=org.yaml.snakeyaml.nodes.Tag",
@@ -120,23 +125,4 @@ tasks.register<JavaExec>("generateCompletion") {
         "waver-completion.sh", // output file name
         "dev.shaaf.waver.cli.Main" // main class name
     )
-}
-
-// Task to copy GraalVM configuration files to the build directory
-tasks.register<Copy>("copyGraalVMConfig") {
-    description = "Copy GraalVM configuration files to the build directory"
-    group = "build"
-
-    from("src/main/resources/META-INF/native-image")
-    into("build/native/nativeCompile/META-INF/native-image")
-
-    // Create the target directory if it doesn't exist
-    doFirst {
-        mkdir("build/native/nativeCompile/META-INF/native-image")
-    }
-}
-
-// Make nativeCompile task depend on copyGraalVMConfig
-tasks.named("nativeCompile") {
-    dependsOn("copyGraalVMConfig")
 }
