@@ -177,7 +177,7 @@ Waver is organized into several key packages:
 - `dev.shaaf.waver.core`: core framework such as Task, Pipeline
 - `dev.shaaf.waver.config`: Configuration classes for the application
 - `dev.shaaf.waver.config.llm`: Classes for interacting with LLM providers
-- `dev.shaaf.waver.util.log`: Logging utilities
+- `dev.shaaf.waver.log`: Logging utilities
 - `dev.shaaf.waver.tutorial.model`: Data models for abstractions, relationships, and chapters
 - `dev.shaaf.waver.tutorial.prompt`: Classes for generating prompts for the LLM
 - `dev.shaaf.waver.tutorial.task`: Pipeline tasks for generating tutorials
