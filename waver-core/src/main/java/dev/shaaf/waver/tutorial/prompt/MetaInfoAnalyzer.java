@@ -16,7 +16,7 @@ public interface MetaInfoAnalyzer {
             - "title": A concise, descriptive title for the tutorial.
             - "description": A paragraph summarizing the project's goal, the technologies used, and what a developer will learn.
             - "repo": The full repository URL provided as input.
-            - "author": Use "Stefan Shaaf" as the author name.
+            - "author": Use "Shaaf" as the author name.
             - "language": The primary programming language used in the codebase (e.g., "Java", "Python").
             - "tags": An array of 5-7 relevant lowercase string tags. Include the language, main frameworks, and key concepts.
             - "difficulty": Classify as one of: "beginner", "intermediate", or "hard".
