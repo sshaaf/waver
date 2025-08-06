@@ -19,4 +19,7 @@ dependencies {
     implementation("com.vladsch.flexmark:flexmark-ext-autolink:0.64.8")
     implementation("com.vladsch.flexmark:flexmark-html2md-converter:0.64.8")
     implementation("com.vladsch.flexmark:flexmark-pdf-converter:0.64.8")
+
+    // https://mvnrepository.com/artifact/org.assertj/assertj-core
+    testImplementation("org.assertj:assertj-core:3.27.3")
 }
