@@ -6,6 +6,7 @@ import dev.shaaf.waver.backend.config.MinioConfig;
 import dev.shaaf.waver.core.PipelineContext;
 import dev.shaaf.waver.core.Task;
 import dev.shaaf.waver.core.TaskRunException;
+import dev.shaaf.waver.tutorial.model.GenerationContext;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
 import jakarta.inject.Inject;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class MinioUploaderTask implements Task<String, UploadResult> {
+public class MinioUploaderTask implements Task<GenerationContext, UploadResult> {
     @Inject
     MinioClient minioClient;
 
@@ -30,17 +31,18 @@ public class MinioUploaderTask implements Task<String, UploadResult> {
     }
 
     @Override
-    public CompletableFuture<UploadResult> execute(String input, PipelineContext context) {
+    public CompletableFuture<UploadResult> execute(GenerationContext generationContext, PipelineContext context) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return uploadDirectory(sourceDirectory.resolve(input));
+                return uploadDirectory(sourceDirectory.resolve(this.sourceDirectory), this.minioConfig.bucketName());
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new TaskRunException("Failed to upload to MinIO", e);
             }
         });
     }
 
-    public UploadResult uploadDirectory(Path sourceDirectory) {
+    public UploadResult uploadDirectory(Path sourceDirectory, String bucketName) {
         if (!Files.exists(sourceDirectory) || !Files.isDirectory(sourceDirectory)) {
             throw new IllegalArgumentException("Source path must be an existing directory: " + sourceDirectory);
         }
@@ -57,7 +59,7 @@ public class MinioUploaderTask implements Task<String, UploadResult> {
 
                             minioClient.uploadObject(
                                     UploadObjectArgs.builder()
-                                            .bucket(minioConfig.bucketName())
+                                            .bucket(bucketName)
                                             .object(objectName)
                                             .filename(filePath.toString())
                                             .build());
@@ -65,6 +67,7 @@ public class MinioUploaderTask implements Task<String, UploadResult> {
                             successfulUploads.add(objectName);
 
                         } catch (Exception e) {
+                            e.printStackTrace();
                             failedUploads.add(filePath.toString());
                         }
                     });

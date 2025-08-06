@@ -66,11 +66,17 @@ public class BackendProcessingService {
 
     public static void generate(AppConfig appConfig) {
 
+        logger.info("starting generation process");
+
+        logger.info(appConfig.toString());
+
         ChatModel chatModel = ModelProviderFactory.buildChatModel(appConfig.llmProvider(), appConfig.apiKey());
         Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" +appConfig.projectName());
-
+        logger.info("starting generation process - building pipeline");
         // TODO: Consider passing AppConfig into the constructor so shared config is simplified across tasks.
         TaskPipeline tasksPipeLine = new TaskPipeline();
+        // Create a linear chain of tasks to execute
+
         tasksPipeLine.add(new CodeCrawlerTask())
                 .then(new IdentifyAbstractionsTask(chatModel, appConfig.projectName()))
                 .then(new IdentifyRelationshipsTask(chatModel, appConfig.projectName()))

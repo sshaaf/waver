@@ -7,11 +7,15 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
+
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
 .minio.sys
 .minio/
+
+waver-git-clone
+waver-backend/waver-git-clone
 
 # IDE
 .idea/

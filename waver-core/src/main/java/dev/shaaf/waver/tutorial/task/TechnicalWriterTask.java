@@ -1,5 +1,6 @@
 package dev.shaaf.waver.tutorial.task;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
@@ -41,10 +42,20 @@ public class TechnicalWriterTask implements Task<GenerationContext, GenerationCo
                 StringBuilder introChapterContent = new StringBuilder();
                 introChapterContent.append(introChapter.writeChapter(generationContext.abstractionsAsString(), generationContext.codeAsString()));
                 introChapterContent.append("## Chapters\n\n");
-                for (Chapter chapter : generationContext.chapterList().chapterList()) {
-                    logger.info("     - Writing chapter: " + chapter.name());
-                    writeChapter(generationContext, writer, introChapterContent, chapter);
-                }
+
+                List<CompletableFuture<String>> chapterFutures = generationContext.chapterList().chapterList().stream()
+                        .map(chapter -> writeChapterAsync(generationContext, writer, chapter))
+                        .collect(Collectors.toList());
+
+                CompletableFuture.allOf(chapterFutures.toArray(new CompletableFuture[0])).join();
+
+                chapterFutures.forEach(future -> {
+                    try {
+                        introChapterContent.append(future.get());
+                    } catch (Exception e) {
+                        throw new TaskRunException("Failed to get chapter content from a future", e);
+                    }
+                });
 
                 writeChapterToDisk(outputDir, "index.md", introChapterContent.toString());
                 logger.info("✅ Tutorial generated at: " + outputDir.toAbsolutePath());
@@ -56,20 +67,26 @@ public class TechnicalWriterTask implements Task<GenerationContext, GenerationCo
         });
     }
 
+    private CompletableFuture<String> writeChapterAsync(GenerationContext generationContext, TutorialWriter writer, Chapter chapter) {
+        return CompletableFuture.supplyAsync(() -> {
+            logger.info("     - Writing chapter: " + chapter.name());
 
-    private void writeChapter(GenerationContext generationContext, TutorialWriter writer, StringBuilder introChapterContent, Chapter chapter){
-        Abstraction currentAbstraction = generationContext.abstractions().abstractions().stream()
-                .filter(a -> a.name().equals(chapter.name())).findFirst().orElseThrow();
+            Abstraction currentAbstraction = generationContext.abstractions().abstractions().stream()
+                    .filter(a -> a.name().equals(chapter.name()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Could not find abstraction for chapter: " + chapter.name()));
 
-        String relevantCode = currentAbstraction.relevantFiles().stream()
-                .flatMap(filePath -> generationContext.codeFiles().stream().filter(cf -> cf.path().equals(filePath)))
-                .map(cf -> "--- File: " + cf.path() + " ---\n" + cf.content())
-                .collect(Collectors.joining("\n\n"));
+            String relevantCode = currentAbstraction.relevantFiles().stream()
+                    .flatMap(filePath -> generationContext.codeFiles().stream().filter(cf -> cf.path().equals(filePath)))
+                    .map(cf -> "--- File: " + cf.path() + " ---\n" + cf.content())
+                    .collect(Collectors.joining("\n\n"));
 
-        String chapterContent = writer.writeChapter(generationContext.abstractionsAsString(), chapter.name(), relevantCode);
-        introChapterContent.append(String.format("* [%s](./%s)\n", chapter.name(), chapter.name().replaceAll("\\s+", "-") + ".md"));
+            String chapterContent = writer.writeChapter(generationContext.abstractionsAsString(), chapter.name(), relevantCode);
 
-        writeChapterToDisk(outputDir, getChapterFileName(chapter.name()), chapterContent);
+            writeChapterToDisk(outputDir, getChapterFileName(chapter.name()), chapterContent);
+
+            return String.format("* [%s](./%s)\n", chapter.name(), getChapterFileName(chapter.name()));
+        });
     }
 
     private String getChapterFileName(String chapterName) {

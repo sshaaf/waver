@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class MetaInfoTask implements Task<GenerationContext, String> {
+public class MetaInfoTask implements Task<GenerationContext, GenerationContext> {
 
     private ChatModel chatModel;
     private Path outputDir;
@@ -32,7 +32,7 @@ public class MetaInfoTask implements Task<GenerationContext, String> {
     }
 
     @Override
-    public CompletableFuture<String> execute(GenerationContext generationContext, PipelineContext context) {
+    public CompletableFuture<GenerationContext> execute(GenerationContext generationContext, PipelineContext context) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 MetaInfoAnalyzer infoAnalyzer = AiServices.create(MetaInfoAnalyzer.class, chatModel);
@@ -48,7 +48,7 @@ public class MetaInfoTask implements Task<GenerationContext, String> {
                 else
                     throw new TaskRunException("Output directory not found " + outputDir.toAbsolutePath());
 
-                return "All is well, that ends well!";
+                return generationContext;
             } catch (Exception e) {
                 throw new TaskRunException("Failed to generate metadata", e);
             }

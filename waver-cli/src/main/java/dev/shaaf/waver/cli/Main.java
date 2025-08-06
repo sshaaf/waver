@@ -10,6 +10,7 @@ import dev.shaaf.waver.config.llm.LLMProvider;
 import dev.shaaf.waver.config.llm.MissingConfigurationException;
 import dev.shaaf.waver.config.llm.ModelProviderFactory;
 import dev.shaaf.waver.core.TaskPipeline;
+import dev.shaaf.waver.tutorial.model.GenerationContext;
 import dev.shaaf.waver.tutorial.task.*;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -20,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 /**
@@ -336,7 +338,7 @@ public class Main implements Callable<Integer> {
 
         logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
         try {
-            Object finalOutput = tasksPipeLine.run(appConfig.inputPath()).get();
+            CompletableFuture<Object> generationContext = tasksPipeLine.run(appConfig.inputPath());
             logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
         } catch (Exception e) {
             logger.severe("❌ Tutorial generation failed: " + e.getMessage());
