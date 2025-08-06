@@ -37,22 +37,19 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: gradle
+          cache: maven
       
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      
-      - name: Build with Gradle
-        run: ./gradlew build
+      - name: Build with Maven
+        run: mvn clean install
       
       - name: Run tests
-        run: ./gradlew test
+        run: mvn test
       
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:
           name: waver-jar
-          path: build/libs/waver-*.jar
+          path: cli/target/cli-*.jar
 
   native-linux:
     name: Build Native Linux
@@ -69,17 +66,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
       
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      
       - name: Build Native Image
-        run: ./gradlew nativeCompile --no-configuration-cache
+        run: mvn clean package -pl cli -Pnative
       
       - name: Upload Linux Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-linux
-          path: waver-cli/build/native/nativeCompile/waver
+          path: cli/target/cli
 
   native-macos:
     name: Build Native macOS (Apple Silicon)
@@ -96,17 +90,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
       
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-      
       - name: Build Native Image
-        run: ./gradlew nativeCompile --no-configuration-cache
+        run: mvn clean package -pl cli -Pnative
       
       - name: Upload macOS Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-macos
-          path: waver-cli/build/native/nativeCompile/waver
+          path: cli/target/cli
 
   native-windows:
     name: Build Native Windows
@@ -124,13 +115,13 @@ jobs:
           native-image-job-reports: 'true'
       
       - name: Build Native Image
-        run: ./gradlew nativeCompile --no-configuration-cache
+        run: mvn clean package -pl cli -Pnative
       
       - name: Upload Windows Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-windows
-          path: waver-cli/build/native/nativeCompile/waver.exe
+          path: cli/target/cli.exe
 
 #  release:
 #    name: Create Release
