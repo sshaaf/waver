@@ -1,4 +1,4 @@
-name: Build and Push Backend to Quay.io
+name: Build and Push Backend
 
 on:
   push:
@@ -30,6 +30,8 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+      - run: mvn clean install
+
 
     - name: Get Git SHA
       id: git-sha

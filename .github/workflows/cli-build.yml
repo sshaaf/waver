@@ -1,4 +1,4 @@
-name: Build and Release
+name: Build CLI
 
 on:
   push:
@@ -39,6 +39,7 @@ jobs:
           java-version: '21'
       - run: mvn clean install
       - run: mvn test
+
       - name: Upload JAR
         uses: actions/upload-artifact@v4
         with:

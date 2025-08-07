@@ -1,4 +1,4 @@
-name: Build and Push to Quay.io
+name: Build and Push site
 
 on:
   push:
