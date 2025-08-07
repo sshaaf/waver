@@ -79,3 +79,72 @@ The backend workflow uses Quarkus's native container build capabilities.
 Docker layer caching is enabled using GitHub Actions cache to speed up subsequent builds.
 
 Maven dependencies are cached for faster backend builds.
+
+## Semantic Release Workflow
+
+The `semantic-release.yml` workflow automatically creates releases based on conventional commit messages.
+
+### How it works
+
+1. **Commit Analysis**: Analyzes commits since the last release
+2. **Version Determination**: Determines the next version based on commit types:
+   - `feat:` → minor version bump
+   - `fix:`, `docs:`, `style:`, `refactor:`, `perf:`, `test:`, `build:`, `ci:`, `chore:`, `revert:` → patch version bump
+   - `BREAKING CHANGE:` → major version bump
+3. **Build Process**: If a new release is needed:
+   - Builds CLI native binaries for Linux, macOS, and Windows
+   - Builds CLI uber-jar
+   - Builds and pushes Docker containers with multiple tags
+   - Creates GitHub release with all artifacts
+
+### Versioning
+
+- **Starting Version**: 0.0.1
+- **Tag Format**: `v{version}` (e.g., `v0.1.0`)
+- **Docker Tags**: 
+  - Git SHA (e.g., `a1b2c3d`)
+  - Semantic version (e.g., `0.1.0`)
+  - `latest`
+
+### Commit Message Format
+
+Use conventional commit messages to trigger releases:
+
+```
+type(scope): description
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types:**
+- `feat`: New features (minor version)
+- `fix`: Bug fixes (patch version)
+- `docs`: Documentation changes (patch version)
+- `style`: Code style changes (patch version)
+- `refactor`: Code refactoring (patch version)
+- `perf`: Performance improvements (patch version)
+- `test`: Adding tests (patch version)
+- `build`: Build system changes (patch version)
+- `ci`: CI/CD changes (patch version)
+- `chore`: Maintenance tasks (patch version)
+- `revert`: Reverting changes (patch version)
+
+**Breaking Changes:**
+Add `BREAKING CHANGE:` to the commit body or footer for major version bumps.
+
+### Example Commits
+
+```bash
+# Minor version (0.0.1 → 0.1.0)
+git commit -m "feat: add new tutorial generation feature"
+
+# Patch version (0.1.0 → 0.1.1)
+git commit -m "fix: resolve CLI argument parsing issue"
+
+# Major version (0.1.0 → 1.0.0)
+git commit -m "feat: completely redesign API
+
+BREAKING CHANGE: API endpoints have been restructured"
+```

@@ -1,0 +1,272 @@
+name: Semantic Release
+
+on:
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+
+env:
+  QUAY_NAMESPACE: sshaaf
+  FRONTEND_IMAGE: quay.io/sshaaf/waver-site
+  BACKEND_IMAGE: quay.io/sshaaf/waver-backend
+
+jobs:
+  semantic-release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    outputs:
+      new_release_published: ${{ steps.check.outputs.new_release_published }}
+      new_release_version: ${{ steps.check.outputs.new_release_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install semantic-release
+        run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Check for new release
+        id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get the next version that would be released
+          NEXT_VERSION=$(npx semantic-release --dry-run --print-version)
+          echo "Next version: $NEXT_VERSION"
+          
+          # Check if there are any commits since the last release
+          LAST_RELEASE=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          COMMITS_SINCE=$(git log --oneline $LAST_RELEASE..HEAD | wc -l)
+          
+          if [ "$COMMITS_SINCE" -gt 0 ]; then
+            echo "new_release_published=true" >> $GITHUB_OUTPUT
+            echo "new_release_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+            echo "New release will be published: $NEXT_VERSION"
+          else
+            echo "new_release_published=false" >> $GITHUB_OUTPUT
+            echo "new_release_version=" >> $GITHUB_OUTPUT
+            echo "No new commits since last release"
+          fi
+
+  build-cli:
+    name: Build CLI Native Binaries
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new_release_published == 'true'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            artifact-name: waver-linux
+            executable-name: waver-cli
+          - os: macos-latest
+            artifact-name: waver-macos
+            executable-name: waver-cli
+          - os: windows-latest
+            artifact-name: waver-windows
+            executable-name: waver-cli.exe
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM
+        uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: '21'
+          distribution: 'graalvm'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          native-image-job-reports: 'true'
+
+      - name: Build Native Image
+        run: mvn clean package -pl waver-cli -Pnative
+
+      - name: Upload Native Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: waver-cli/target/${{ matrix.executable-name }}
+
+  build-jar:
+    name: Build CLI JAR
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: waver-jar
+          path: waver-cli/target/waver-cli-*.jar
+
+  build-frontend:
+    name: Build and Push Frontend Container
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Get Git SHA
+        id: git-sha
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "full-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Log in to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Build and push Frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./waver-site
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:${{ steps.git-sha.outputs.sha }}
+            ${{ env.FRONTEND_IMAGE }}:${{ needs.semantic-release.outputs.new_release_version }}
+            ${{ env.FRONTEND_IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  build-backend:
+    name: Build and Push Backend Container
+    needs: semantic-release
+    if: needs.semantic-release.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Get Git SHA
+        id: git-sha
+        run: |
+          echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "full-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Log in to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+
+      - name: Build and push Backend Docker image
+        run: |
+          cd waver-backend
+          mvn clean package -Dquarkus.container-image.build=true \
+            -Dquarkus.container-image.push=true \
+            -Dquarkus.container-image.registry=quay.io \
+            -Dquarkus.container-image.group=${{ env.QUAY_NAMESPACE }} \
+            -Dquarkus.container-image.name=waver-backend \
+            -Dquarkus.container-image.tag=${{ steps.git-sha.outputs.sha }}
+          
+          # Tag with semantic version
+          docker tag ${{ env.BACKEND_IMAGE }}:${{ steps.git-sha.outputs.sha }} ${{ env.BACKEND_IMAGE }}:${{ needs.semantic-release.outputs.new_release_version }}
+          docker push ${{ env.BACKEND_IMAGE }}:${{ needs.semantic-release.outputs.new_release_version }}
+          
+          # Tag as latest
+          docker tag ${{ env.BACKEND_IMAGE }}:${{ steps.git-sha.outputs.sha }} ${{ env.BACKEND_IMAGE }}:latest
+          docker push ${{ env.BACKEND_IMAGE }}:latest
+
+  create-release:
+    name: Create GitHub Release
+    needs: [semantic-release, build-cli, build-jar]
+    if: needs.semantic-release.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ needs.semantic-release.outputs.new_release_version }}
+          tag_name: v${{ needs.semantic-release.outputs.new_release_version }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/waver-jar/*.jar
+            artifacts/waver-linux/waver-cli
+            artifacts/waver-macos/waver-cli
+            artifacts/waver-windows/waver-cli.exe
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  perform-release:
+    name: Perform Semantic Release
+    needs: [semantic-release, create-release]
+    if: needs.semantic-release.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install semantic-release
+        run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/github
+
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Perform Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
