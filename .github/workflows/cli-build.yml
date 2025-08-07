@@ -29,6 +29,7 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
       
@@ -39,11 +40,21 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Verify Maven Environment
+        run: |
+          mvn --version
+          mvn dependency:tree -pl waver-core
+          mvn dependency:tree -pl waver-cli
       
-      - name: Run tests
-        run: mvn test
+      - name: Build and Test with Maven
+        run: mvn clean verify -B -e
+      
+      - name: Debug Build (if needed)
+        if: failure()
+        run: |
+          echo "Build failed, running debug script..."
+          chmod +x scripts/debug-build.sh
+          ./scripts/debug-build.sh
       
       - name: Upload JAR
         uses: actions/upload-artifact@v4
