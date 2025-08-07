@@ -11,7 +11,6 @@ import java.util.Optional;
 public interface WaverConfig {
     LLMProvider llmProvider();
     String outputPath();;
-    String projectName();;
     boolean verbose();;
     FormatConverter.OutputFormat outputFormat();;
     OpenAI openai();;

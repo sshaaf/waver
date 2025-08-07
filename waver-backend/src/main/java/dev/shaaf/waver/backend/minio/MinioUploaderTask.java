@@ -1,40 +1,50 @@
 package dev.shaaf.waver.backend.minio;
 
 
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
+
+import dev.shaaf.waver.backend.FileUtil;
 import dev.shaaf.waver.backend.config.MinioConfig;
+import dev.shaaf.waver.backend.process.BackendProcessingService;
 import dev.shaaf.waver.core.PipelineContext;
 import dev.shaaf.waver.core.Task;
 import dev.shaaf.waver.core.TaskRunException;
 import dev.shaaf.waver.tutorial.model.GenerationContext;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 public class MinioUploaderTask implements Task<GenerationContext, UploadResult> {
-    @Inject
+
     MinioClient minioClient;
 
-    @Inject
-    MinioConfig minioConfig;
+    Path sourceDirectory;
 
-    private Path sourceDirectory;
+    String bucketName;
 
-    public MinioUploaderTask(Path sourceDirectory) {
+    String uploadProjectName;
+
+    public MinioUploaderTask(MinioClient minioClient, Path sourceDirectory, String bucketName) {
+        this.minioClient = minioClient;
         this.sourceDirectory = sourceDirectory;
+        this.bucketName = bucketName;
+        this.uploadProjectName = FileUtil.getFolderNameFromInputPath(sourceDirectory.toString());
     }
 
     @Override
     public CompletableFuture<UploadResult> execute(GenerationContext generationContext, PipelineContext context) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return uploadDirectory(sourceDirectory.resolve(this.sourceDirectory), this.minioConfig.bucketName());
+                return uploadDirectory(sourceDirectory.resolve(this.sourceDirectory), bucketName);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new TaskRunException("Failed to upload to MinIO", e);
@@ -55,8 +65,8 @@ public class MinioUploaderTask implements Task<GenerationContext, UploadResult> 
                     .forEach(filePath -> {
                         try {
                             Path relativePath = sourceDirectory.relativize(filePath);
-                            String objectName = relativePath.toString().replace("\\", "/");
-
+                            String objectName = Paths.get(uploadProjectName, relativePath.toString()).toString();
+                            objectName = objectName.replace('\\', '/');
                             minioClient.uploadObject(
                                     UploadObjectArgs.builder()
                                             .bucket(bucketName)

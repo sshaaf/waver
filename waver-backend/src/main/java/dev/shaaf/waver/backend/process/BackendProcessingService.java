@@ -1,7 +1,10 @@
 package dev.shaaf.waver.backend.process;
 
 import dev.langchain4j.model.chat.ChatModel;
+import dev.shaaf.waver.backend.FileUtil;
+import dev.shaaf.waver.backend.config.MinioConfig;
 import dev.shaaf.waver.backend.config.WaverConfig;
+import dev.shaaf.waver.backend.minio.MinioClientProducer;
 import dev.shaaf.waver.backend.minio.MinioUploaderTask;
 import dev.shaaf.waver.backend.WaverProcessEvent;
 import dev.shaaf.waver.backend.minio.UploadResult;
@@ -12,6 +15,7 @@ import dev.shaaf.waver.config.llm.MissingConfigurationException;
 import dev.shaaf.waver.config.llm.ModelProviderFactory;
 import dev.shaaf.waver.core.TaskPipeline;
 import dev.shaaf.waver.tutorial.task.*;
+import io.minio.MinioClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
@@ -31,6 +35,12 @@ public class BackendProcessingService {
     @Inject
     WaverConfig waverConfig;
 
+    @Inject
+    MinioConfig minioConfig;
+
+    @Inject
+    MinioClient minioClient;
+
     private static final Logger logger = Logger.getLogger(BackendProcessingService.class.getName());
 
     @Incoming("requests")
@@ -48,6 +58,8 @@ public class BackendProcessingService {
             throw new MissingConfigurationException("LLM API key is missing.");
         }
 
+
+
         generate(
                 new AppConfig(
                         inputPath,
@@ -55,7 +67,7 @@ public class BackendProcessingService {
                         waverConfig.llmProvider(),
                         providerConfig.getApiKey(),
                         waverConfig.verbose(),
-                        waverConfig.projectName(),
+                        FileUtil.getFolderNameFromInputPath(inputPath),
                         waverConfig.outputFormat()));
     }
 
@@ -64,7 +76,7 @@ public class BackendProcessingService {
     }
 
 
-    public static void generate(AppConfig appConfig) {
+    public void generate(AppConfig appConfig) {
 
         logger.info("starting generation process");
 
@@ -83,7 +95,7 @@ public class BackendProcessingService {
                 .then(new ChapterOrganizerTask(chatModel))
                 .then(new TechnicalWriterTask(chatModel, outputDir))
                 .then(new MetaInfoTask(chatModel, outputDir, appConfig.projectName(), appConfig.inputPath()))
-                .then(new MinioUploaderTask(outputDir));
+                .then(new MinioUploaderTask(minioClient, outputDir, minioConfig.bucketName()));
 
         logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
         try {
@@ -117,4 +129,5 @@ public class BackendProcessingService {
             );
         };
     }
+
 }
