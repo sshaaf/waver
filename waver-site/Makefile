@@ -86,3 +86,7 @@ deploy-prod: ## Deploy production version
 
 deploy-staging: ## Deploy staging version
 	@$(MAKE) deploy-full IMAGE_TAG=staging
+
+# Testing
+test-cloud-event: ## Test cloud event functionality
+	@./scripts/test-cloud-event.sh

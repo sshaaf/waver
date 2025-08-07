@@ -7,3 +7,4 @@ metadata:
 data:
   minio-endpoint: "http://minio-service:9000"
   minio-bucket: "waver-bucket"
+  cloud-event-service-url: "http://cloud-event-service:8080"

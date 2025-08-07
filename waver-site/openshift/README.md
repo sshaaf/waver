@@ -110,6 +110,7 @@ The application uses the following environment variables:
 - `MINIO_ACCESS_KEY` - MinIO access key
 - `MINIO_SECRET_KEY` - MinIO secret key
 - `MINIO_BUCKET` - MinIO bucket name
+- `CLOUD_EVENT_SERVICE_URL` - Cloud event processing service URL
 
 ### Resource Limits
 

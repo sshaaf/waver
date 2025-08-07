@@ -99,6 +99,7 @@ cd openshift
 | `PROJECT_NAME` | OpenShift project name | `waver-site` |
 | `CLUSTER_DOMAIN` | OpenShift cluster domain | `your-cluster-domain.com` |
 | `SKIP_BUILD` | Skip Docker build step | `false` |
+| `CLOUD_EVENT_SERVICE_URL` | Cloud event processing service URL | `http://localhost:8080` |
 
 ### MinIO Configuration
 

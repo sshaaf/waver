@@ -43,6 +43,11 @@ spec:
             configMapKeyRef:
               name: waver-site-config
               key: minio-bucket
+        - name: CLOUD_EVENT_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: waver-site-config
+              key: cloud-event-service-url
         resources:
           requests:
             memory: "256Mi"

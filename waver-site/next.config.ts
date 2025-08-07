@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY || 'minioadmin',
     MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY || 'minioadmin',
     MINIO_BUCKET: process.env.MINIO_BUCKET || 'waver-bucket',
+    CLOUD_EVENT_SERVICE_URL: process.env.CLOUD_EVENT_SERVICE_URL || 'http://localhost:8080',
   },
 };
 

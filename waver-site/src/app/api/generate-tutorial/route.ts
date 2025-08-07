@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,28 +21,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Here you would integrate with your backend service
-    // For now, we'll simulate the API call
-    console.log('Scheduling tutorial generation for:', repositoryUrl);
+    // Get cloud event service URL from environment
+    const cloudEventServiceUrl = process.env.CLOUD_EVENT_SERVICE_URL || 'http://localhost:8080';
+    
+    // Generate a unique event ID
+    const eventId = uuidv4();
+    
+    // Prepare cloud event payload
+    const cloudEventPayload = {
+      sourceUrl: repositoryUrl
+    };
 
-    // Simulate API call to backend
-    // const response = await fetch('YOUR_BACKEND_URL/api/generate-tutorial', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ repositoryUrl }),
-    // });
+    // Make cloud event call to the processing service
+    console.log('Sending cloud event to:', `${cloudEventServiceUrl}/requests`);
+    console.log('Event ID:', eventId);
+    console.log('Repository URL:', repositoryUrl);
 
-    // if (!response.ok) {
-    //   throw new Error('Backend service unavailable');
-    // }
+    const response = await fetch(`${cloudEventServiceUrl}/requests`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'ce-specversion': '1.0',
+        'ce-type': 'dev.shaaf.waver.processing.request',
+        'ce-source': '/waver-site-frontend',
+        'ce-id': eventId,
+      },
+      body: JSON.stringify(cloudEventPayload),
+    });
+
+    if (!response.ok) {
+      console.error('Cloud event service error:', response.status, response.statusText);
+      throw new Error(`Cloud event service responded with status: ${response.status}`);
+    }
+
+    console.log('Cloud event sent successfully');
 
     // Return success response
     return NextResponse.json(
       { 
         message: 'Tutorial generation scheduled successfully',
-        repositoryUrl 
+        repositoryUrl,
+        eventId
       },
       { status: 200 }
     );
@@ -49,7 +69,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error generating tutorial:', error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { message: 'Failed to schedule tutorial generation. Please try again.' },
       { status: 500 }
     );
   }
