@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: waver-jar
-          path: cli/target/cli-*.jar
+          path: waver-cli/target/waver-cli-*.jar
 
   native-linux:
     name: Build Native Linux
@@ -67,13 +67,13 @@ jobs:
           native-image-job-reports: 'true'
       
       - name: Build Native Image
-        run: mvn clean package -pl cli -Pnative
+        run: mvn clean package -pl waver-cli -Pnative
       
       - name: Upload Linux Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-linux
-          path: cli/target/cli
+          path: waver-cli/target/waver-cli
 
   native-macos:
     name: Build Native macOS (Apple Silicon)
@@ -91,13 +91,13 @@ jobs:
           native-image-job-reports: 'true'
       
       - name: Build Native Image
-        run: mvn clean package -pl cli -Pnative
+        run: mvn clean package -pl waver-cli -Pnative
       
       - name: Upload macOS Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-macos
-          path: cli/target/cli
+          path: waver-cli/target/waver-cli
 
   native-windows:
     name: Build Native Windows
@@ -115,13 +115,13 @@ jobs:
           native-image-job-reports: 'true'
       
       - name: Build Native Image
-        run: mvn clean package -pl cli -Pnative
+        run: mvn clean package -pl waver-cli -Pnative
       
       - name: Upload Windows Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-windows
-          path: cli/target/cli.exe
+          path: waver-cli/target/waver-cli.exe
 
 #  release:
 #    name: Create Release
@@ -146,7 +146,7 @@ jobs:
 #          prerelease: false
 #          files: |
 #            artifacts/waver-jar/*.jar
-#            artifacts/waver-linux/waver
-#            artifacts/waver-macos/waver
-#            artifacts/waver-windows/waver.exe
+#            artifacts/waver-linux/waver-cli
+#            artifacts/waver-macos/waver-cli
+#            artifacts/waver-windows/waver-cli.exe
 #          token: ${{ secrets.GITHUB_TOKEN }}
