@@ -47,7 +47,7 @@ jobs:
           mvn dependency:tree -pl waver-cli
       
       - name: Build and Test with Maven
-        run: mvn clean verify -B -e
+        run: mvn clean compile package install
       
       - name: Debug Build (if needed)
         if: failure()
