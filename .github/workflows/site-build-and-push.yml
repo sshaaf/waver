@@ -17,6 +17,7 @@ env:
 
 jobs:
   build-and-push:
+    environment: build
     runs-on: ubuntu-latest
     
     steps:
