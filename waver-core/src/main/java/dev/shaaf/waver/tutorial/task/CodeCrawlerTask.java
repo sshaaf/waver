@@ -1,5 +1,6 @@
 package dev.shaaf.waver.tutorial.task;
 
+import java.util.concurrent.CompletableFuture;
 import dev.shaaf.waver.core.PipelineContext;
 import dev.shaaf.waver.core.Task;
 import dev.shaaf.waver.core.TaskRunException;
@@ -18,27 +19,24 @@ import java.nio.file.Paths;
 public class CodeCrawlerTask implements Task<String, GenerationContext> {
 
     @Override
-    public GenerationContext execute(String inputString, PipelineContext context) throws TaskRunException {
-        InputType inputType = checkInputType(inputString);
-        System.out.println("Input type: " + inputType);
+    public CompletableFuture<GenerationContext> execute(String inputString, PipelineContext context) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                InputType inputType = checkInputType(inputString);
+                System.out.println("Input type: " + inputType);
 
-        if(inputType == InputType.GIT_URL){
-            try {
-                return new GenerationContext(FetchRepo.crawl(GitHubRepoFetcher.getAndCloneRepo(inputString)), null, null, null,null);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new TaskRunException(e);
+                if(inputType == InputType.GIT_URL){
+                    return new GenerationContext(FetchRepo.crawl(GitHubRepoFetcher.getAndCloneRepo(inputString)), null, null, null,null);
+                }
+                else if(inputType == InputType.LOCAL_DIRECTORY){
+                    return new GenerationContext(FetchRepo.crawl(inputString), null, null, null, null);
+                }
+                else
+                    throw new TaskRunException(inputString, "Invalid input type");
+            } catch (Exception e) {
+                throw new TaskRunException("Failed to crawl code", e);
             }
-        }
-        else if(inputType == InputType.LOCAL_DIRECTORY){
-            try {
-                return new GenerationContext(FetchRepo.crawl(inputString), null, null, null, null);
-            } catch (IOException e) {
-                throw new TaskRunException(e);
-            }
-        }
-        else
-            throw new TaskRunException(inputString, "Invalid input type");
+        });
     }
 
     public enum InputType {

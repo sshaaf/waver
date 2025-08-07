@@ -28,7 +28,7 @@ public record AppConfig(
         OutputFormat outputFormat
 ) {
 
-    public static final String DEFAULT_GITHUB_CLONE_PATH = System.getProperty("user.dir")+"/waver-git-clone/";
+    public static final String DEFAULT_GITHUB_CLONE_PATH = System.getProperty("user.dir")+"/.waver-git-clone/";
 
 
 }

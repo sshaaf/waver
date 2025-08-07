@@ -1,5 +1,6 @@
 package dev.shaaf.waver.tutorial.task;
 
+import java.util.concurrent.CompletableFuture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.langchain4j.model.chat.ChatModel;
@@ -16,7 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class MetaInfoTask implements Task<GenerationContext, String> {
+public class MetaInfoTask implements Task<GenerationContext, GenerationContext> {
 
     private ChatModel chatModel;
     private Path outputDir;
@@ -31,25 +32,26 @@ public class MetaInfoTask implements Task<GenerationContext, String> {
     }
 
     @Override
-    public String execute(GenerationContext generationContext, PipelineContext context) throws TaskRunException {
+    public CompletableFuture<GenerationContext> execute(GenerationContext generationContext, PipelineContext context) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                MetaInfoAnalyzer infoAnalyzer = AiServices.create(MetaInfoAnalyzer.class, chatModel);
+                TutorialMetadata metadata = infoAnalyzer.generateMetadata(generationContext.codeAsString(), generationContext.abstractionsAsString(), projectName);
 
-        MetaInfoAnalyzer infoAnalyzer = AiServices.create(MetaInfoAnalyzer.class, chatModel);
-        TutorialMetadata metadata = infoAnalyzer.generateMetadata(generationContext.codeAsString(), generationContext.abstractionsAsString(), projectName);
+                metadata = metadata.withRepoOwner((GitHubRepoFetcher.getOwnerFromUrl(inputString)).orElse("Unknown"));
 
-        metadata = metadata.withRepoOwner((GitHubRepoFetcher.getOwnerFromUrl(inputString)).orElse("Unknown"));
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+                if(Files.isDirectory(outputDir))
+                    mapper.writeValue(outputDir.resolve("waver-config.json").toFile(), metadata);
+                else
+                    throw new TaskRunException("Output directory not found " + outputDir.toAbsolutePath());
 
-        try{
-            if(Files.isDirectory(outputDir))
-                mapper.writeValue(outputDir.resolve("waver-config.json").toFile(), metadata);
-            else
-                throw new TaskRunException("Output directory not found " + outputDir.toAbsolutePath());
-        } catch (IOException e) {
-            throw new TaskRunException(e);
-        }
-
-        return "All is well, that ends well!";
+                return generationContext;
+            } catch (Exception e) {
+                throw new TaskRunException("Failed to generate metadata", e);
+            }
+        });
     }
 }

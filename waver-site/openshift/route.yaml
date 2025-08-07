@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: waver-site-route
+  labels:
+    app: waver-site
+spec:
+  host: waver-site.apps.${CLUSTER_DOMAIN}
+  to:
+    kind: Service
+    name: waver-site-service
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

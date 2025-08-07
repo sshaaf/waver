@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -63,13 +64,14 @@ class CodeCrawlerTaskTest {
 
         @Test
         @DisplayName("Nothing to crawl")
-        void crawl_WhenInputIsLocalDirectory_ShouldSucceed() throws IOException {
+        void crawl_WhenInputIsLocalDirectory_ShouldSucceed() throws Exception {
             // Arrange
             Path projectDir = Files.createDirectory(tempDir.resolve("local_project"));
 
             // Act
             CodeCrawlerTask task = new CodeCrawlerTask();
-            GenerationContext result = task.execute(projectDir.toString(), new PipelineContext());
+            CompletableFuture<GenerationContext> future = task.execute(projectDir.toString(), new PipelineContext());
+            GenerationContext result = future.get();
 
             // Assert
             assertNotNull(result);
@@ -83,9 +85,10 @@ class CodeCrawlerTaskTest {
             Path testFile = Files.createFile(tempDir.resolve("a_file.txt"));
 
             // Act & Assert
-            assertThrows(InvalidPathException.class, () -> {
+            assertThrows(Exception.class, () -> {
                 CodeCrawlerTask task = new CodeCrawlerTask();
-                GenerationContext result = task.execute(testFile.toString(), new PipelineContext());
+                CompletableFuture<GenerationContext> future = task.execute(testFile.toString(), new PipelineContext());
+                future.get();
             });
         }
     }

@@ -10,6 +10,7 @@ import dev.shaaf.waver.config.llm.LLMProvider;
 import dev.shaaf.waver.config.llm.MissingConfigurationException;
 import dev.shaaf.waver.config.llm.ModelProviderFactory;
 import dev.shaaf.waver.core.TaskPipeline;
+import dev.shaaf.waver.tutorial.model.GenerationContext;
 import dev.shaaf.waver.tutorial.task.*;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -20,6 +21,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 /**
@@ -31,7 +33,7 @@ import java.util.logging.Logger;
  * </p>
  */
 @Command(
-        name = "waver",
+        name = "waver-cli",
         mixinStandardHelpOptions = true,
         version = "0.0.1",
         description = "Generates tutorials and blogs from sourcecode using LLMs",
@@ -325,6 +327,8 @@ public class Main implements Callable<Integer> {
 
         // TODO: Consider passing AppConfig into the constructor so shared config is simplified across tasks.
         TaskPipeline tasksPipeLine = new TaskPipeline();
+
+        // Create a linear chain of tasks to execute
         tasksPipeLine.add(new CodeCrawlerTask())
                 .then(new IdentifyAbstractionsTask(chatModel, appConfig.projectName()))
                 .then(new IdentifyRelationshipsTask(chatModel, appConfig.projectName()))
@@ -333,8 +337,13 @@ public class Main implements Callable<Integer> {
                 .then(new MetaInfoTask(chatModel, outputDir, appConfig.projectName(), appConfig.inputPath()));
 
         logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
-        String finalOutput = tasksPipeLine.run(appConfig.inputPath());
-        logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
+        try {
+            CompletableFuture<Object> generationContext = tasksPipeLine.run(appConfig.inputPath());
+            logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
+        } catch (Exception e) {
+            logger.severe("❌ Tutorial generation failed: " + e.getMessage());
+            throw new RuntimeException("Tutorial generation failed", e);
+        }
 
     }
 

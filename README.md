@@ -23,7 +23,7 @@ Waver is a command-line tool that generates code tutorials from source code usin
 ### Prerequisites
 
 - Java 21 or higher
-- Gradle 8.0 or higher
+- Maven 3.8 or higher
 - An API key for Gemini or OpenAI
 
 ### Building from Source
@@ -36,10 +36,10 @@ Waver is a command-line tool that generates code tutorials from source code usin
 
 2. Build the project:
    ```
-   ./gradlew build
+   mvn clean install
    ```
 
-For more detailed build instructions, including native compilation, see [Developers.md](DEVELOPERS.md).
+For more detailed build instructions, including native compilation, see [README-MAVEN.md](docs/README-MAVEN.md).
 
 ## Usage
 
@@ -87,8 +87,8 @@ waver --input ./my-project --output ./tutorials --project-name "My Project" --ll
 
 ## Documentation
 
-- [Developers Guide](DEVELOPERS.md): Detailed information for developers working on Waver
-- [Contributors Guide](CONTRIBUTORS.md): Guidelines for contributing to the project
+- [Developers Guide](docs/DEVELOPERS.md): Detailed information for developers working on Waver
+- [Contributors Guide](docs/CONTRIBUTORS.md): Guidelines for contributing to the project
 
 ## License
 
