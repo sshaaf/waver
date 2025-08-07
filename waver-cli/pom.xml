@@ -22,7 +22,7 @@
         <!-- Core module dependency -->
         <dependency>
             <groupId>dev.shaaf.waver</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>waver-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
