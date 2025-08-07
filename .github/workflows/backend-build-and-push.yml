@@ -30,8 +30,7 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-      - run: mvn clean install
-
+    - run: mvn clean install
 
     - name: Get Git SHA
       id: git-sha
