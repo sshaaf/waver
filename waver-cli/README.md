@@ -45,9 +45,6 @@ This creates a shaded JAR file at `target/waver-cli-1.0-SNAPSHOT.jar` that inclu
 ```bash
 # Build native executable
 mvn clean package -pl waver-cli -Pnative
-
-# Build with container-based native compilation
-mvn clean package -pl waver-cli -Pnative -Dquarkus.native.container-build=true
 ```
 
 This creates a native executable at `target/waver-cli` (Linux/macOS) or `target/waver-cli.exe` (Windows).

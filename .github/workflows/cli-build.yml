@@ -62,7 +62,7 @@ jobs:
       - run: mvn clean install
       
       - name: Build Native Image
-        run: mvn package -pl waver-cli -Pnative -Dquarkus.native.container-build=true
+        run: mvn package -pl waver-cli -Pnative
       
       - name: Upload Linux Native Executable
         uses: actions/upload-artifact@v4
@@ -87,7 +87,7 @@ jobs:
       - run: mvn clean install
 
       - name: Build Native Image
-        run: mvn package -pl waver-cli -Pnative -Dquarkus.native.container-build=true
+        run: mvn package -pl waver-cli -Pnative
       
       - name: Upload macOS Native Executable
         uses: actions/upload-artifact@v4
@@ -140,7 +140,7 @@ jobs:
       - run: mvn clean install
 
       - name: Build Native Image
-        run: mvn package -pl waver-cli -Pnative -Dquarkus.native.container-build=true
+        run: mvn package -pl waver-cli -Pnative
       
       - name: Upload Windows Native Executable
         uses: actions/upload-artifact@v4
