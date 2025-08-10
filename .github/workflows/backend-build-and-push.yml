@@ -4,30 +4,18 @@ on:
   push:
     branches: [ main ]
     paths-ignore:
-      - '**/*.md'
-      - '**/*.png'
-      - '**/*.jpg'
-      - '**/*.jpeg'
-      - '**/*.gif'
-      - '**/*.svg'
-      - '**/*.ico'
-      - '**/*.webp'
+      - '**.md'
+      - '**.png'
+      - '**.jpg'
   pull_request:
     branches: [ main ]
     paths-ignore:
-      - '**/*.md'
-      - '**/*.png'
-      - '**/*.jpg'
-      - '**/*.jpeg'
-      - '**/*.gif'
-      - '**/*.svg'
-      - '**/*.ico'
-      - '**/*.webp'
+      - '**.md'
+      - '**.png'
+      - '**.jpg'
   workflow_dispatch:
 
 env:
-  QUAY_NAMESPACE: sshaaf
-  IMAGE_NAME: waver-backend
   QUAY_REPOSITORY: quay.io/sshaaf/waver-backend
 
 jobs:
@@ -35,9 +23,14 @@ jobs:
     environment: build
     runs-on: ubuntu-latest
     permissions:
-      contents: read # Read permissions for checkout
-      packages: write # Write permissions for pushing packages
-    
+      contents: read
+      packages: write
+
+    # Set a default working directory for all steps
+    defaults:
+      run:
+        working-directory: waver-backend
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -47,28 +40,43 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-      - run: mvn clean install
 
       - name: Cache Maven packages
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-backend-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
+            ${{ runner.os }}-maven-backend-
+
+      - name: Run tests and build project
+        # This step verifies that the project compiles and tests pass.
+        # It runs for both PRs and pushes to main.
+        run: mvn -B install
 
       - name: Log in to Quay.io
+        # This step is safe to run for both events.
         uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
-      - name: Build and Push Container Image
+      - name: Build Container Image (PR Check)
+        # This step ONLY runs for pull requests. It builds the image but does NOT push.
+        if: github.event_name == 'pull_request'
         run: |
           mvn package -pl waver-backend \
+            -Dquarkus.container-image.build=true \
+            -Dquarkus.container-image.push=false \
+            -Dquarkus.container-image.tag=${{ github.sha }}
+
+      - name: Build and Push Container Image (on Merge to Main)
+        # This step ONLY runs on a push to the main branch. It builds AND pushes.
+        if: github.event_name == 'push'
+        run: |
+          mvn package -pl waver-backend  \
             -Dquarkus.container-image.build=true \
             -Dquarkus.container-image.push=true \
             -Dquarkus.container-image.tag=${GITHUB_SHA::8} \
             -Dquarkus.container-image.additional-tags=latest
-
