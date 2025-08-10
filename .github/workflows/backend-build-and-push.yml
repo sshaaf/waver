@@ -2,13 +2,28 @@ name: Build and Push Backend
 
 on:
   push:
-    branches: [ main, develop ]
-    paths:
-      - 'waver-backend/**'
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.gif'
+      - '**/*.svg'
+      - '**/*.ico'
+      - '**/*.webp'
   pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'waver-backend/**'
+    branches: [ main ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.jpg'
+      - '**/*.jpeg'
+      - '**/*.gif'
+      - '**/*.svg'
+      - '**/*.ico'
+      - '**/*.webp'
+  workflow_dispatch:
 
 env:
   QUAY_NAMESPACE: sshaaf

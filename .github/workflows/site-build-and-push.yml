@@ -1,14 +1,8 @@
 name: Build and Push site
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'waver-site/**'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'waver-site/**'
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
 
 env:
   QUAY_NAMESPACE: sshaaf
