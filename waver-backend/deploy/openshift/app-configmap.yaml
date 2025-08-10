@@ -1,0 +1,21 @@
+# configmap-quarkus-prod.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # Choose a meaningful name, e.g., matching your application
+  name: waver-config
+data:
+  waver.llmprovider: "OpenAI"
+  waver.project-name: "MyAwesomeProject"
+  waver.output-path: "./generated-docs"
+  waver.verbose: "true"
+  waver.output-format: "MARKDOWN"
+  quarkus.langchain4j.timeout: 60s
+  quarkus.kubernetes-config.secrets: app-credentials
+  minio.endpoint: 'http://minio.waver.svc.cluster.local:9000'
+  quarkus.http.port: '8080'
+  quarkus.openshift.env.secrets: app-credentials
+  quarkus.kubernetes-config.secrets.enabled: 'true'
+  minio.bucket-name: waver-bucket
+  quarkus.openshift.route.tls.termination: edge
+binaryData: {}

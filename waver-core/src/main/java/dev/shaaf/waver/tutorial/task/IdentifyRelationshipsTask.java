@@ -1,5 +1,6 @@
 package dev.shaaf.waver.tutorial.task;
 
+import java.util.concurrent.CompletableFuture;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.shaaf.waver.core.PipelineContext;
@@ -20,15 +21,20 @@ public class IdentifyRelationshipsTask implements Task<GenerationContext, Genera
     }
 
     @Override
-    public GenerationContext execute(GenerationContext generationContext, PipelineContext context) throws TaskRunException {
-        RelationshipAnalyzer analyzer = AiServices.create(RelationshipAnalyzer.class, model);
+    public CompletableFuture<GenerationContext> execute(GenerationContext generationContext, PipelineContext context) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                RelationshipAnalyzer analyzer = AiServices.create(RelationshipAnalyzer.class, model);
 
-        return generationContext.withRelationshipAnalysis(
-                analyzer.analyzeRelationships(
-                        generationContext.codeAsString(),
-                        generationContext.abstractionsAsString(),
-                        projectName));
-
+                return generationContext.withRelationshipAnalysis(
+                        analyzer.analyzeRelationships(
+                                generationContext.codeAsString(),
+                                generationContext.abstractionsAsString(),
+                                projectName));
+            } catch (Exception e) {
+                throw new TaskRunException("Failed to identify relationships", e);
+            }
+        });
     }
 
 }

@@ -1,5 +1,6 @@
 package dev.shaaf.waver.tutorial.task;
 
+import java.util.concurrent.CompletableFuture;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.service.AiServices;
 import dev.shaaf.waver.core.PipelineContext;
@@ -17,8 +18,14 @@ public class ChapterOrganizerTask implements Task<GenerationContext, GenerationC
     }
 
     @Override
-    public GenerationContext execute(GenerationContext generationContext, PipelineContext context) throws TaskRunException {
-        ChapterOrderAnalyzer analyzer = AiServices.create(ChapterOrderAnalyzer.class, chatModel);
-        return generationContext.withChapterList(analyzer.determineChapterOrder(generationContext.abstractionsAsString()));
+    public CompletableFuture<GenerationContext> execute(GenerationContext generationContext, PipelineContext context) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                ChapterOrderAnalyzer analyzer = AiServices.create(ChapterOrderAnalyzer.class, chatModel);
+                return generationContext.withChapterList(analyzer.determineChapterOrder(generationContext.abstractionsAsString()));
+            } catch (Exception e) {
+                throw new TaskRunException("Failed to organize chapters", e);
+            }
+        });
     }
 }

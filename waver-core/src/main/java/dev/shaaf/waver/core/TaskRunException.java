@@ -19,5 +19,6 @@ public class TaskRunException extends RuntimeException{
     }
 
     public TaskRunException(String inputString, String invalidInputType) {
+        super("Invalid input type: " + invalidInputType + " for input: " + inputString);
     }
 }

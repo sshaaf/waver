@@ -1,0 +1,330 @@
+{
+  "tutorials": [
+    {
+      "id": "web-dev-beginners",
+      "title": "Web Development for Beginners",
+      "description": "A comprehensive 24-lesson course covering JavaScript, CSS, and HTML basics",
+      "repository": {
+        "name": "Web-Dev-For-Beginners",
+        "full_name": "microsoft/Web-Dev-For-Beginners",
+        "description": "A comprehensive 24-lesson course covering JavaScript, CSS, and HTML basics",
+        "html_url": "https://github.com/microsoft/Web-Dev-For-Beginners",
+        "stargazers_count": 75000,
+        "forks_count": 12000,
+        "language": "JavaScript",
+        "updated_at": "2024-01-15T10:30:00Z",
+        "created_at": "2020-12-01T00:00:00Z",
+        "owner": {
+          "login": "microsoft",
+          "avatar_url": "https://avatars.githubusercontent.com/u/6154722?v=4",
+          "html_url": "https://github.com/microsoft"
+        },
+        "topics": ["javascript", "css", "html", "web-development", "tutorial"]
+      },
+      "metadata": {
+        "author": "Microsoft",
+        "tags": ["Web Development", "JavaScript", "CSS", "HTML", "Beginner"],
+        "difficulty": "beginner",
+        "estimatedTime": "12 weeks",
+        "prerequisites": ["Basic computer skills", "No programming experience required"],
+        "lastUpdated": "2024-01-15T10:30:00Z"
+      },
+      "featured": true,
+      "category": "Web Development",
+      "slug": "web-development-for-beginners"
+    },
+    {
+      "id": "50-projects-50-days",
+      "title": "50 Projects in 50 Days",
+      "description": "Build 50 mini web projects using HTML, CSS & JavaScript",
+      "repository": {
+        "name": "50projects50days",
+        "full_name": "bradtraversy/50projects50days",
+        "description": "Build 50 mini web projects using HTML, CSS & JavaScript",
+        "html_url": "https://github.com/bradtraversy/50projects50days",
+        "stargazers_count": 45000,
+        "forks_count": 8000,
+        "language": "JavaScript",
+        "updated_at": "2024-02-20T14:15:00Z",
+        "created_at": "2021-03-15T00:00:00Z",
+        "owner": {
+          "login": "bradtraversy",
+          "avatar_url": "https://avatars.githubusercontent.com/u/5550850?v=4",
+          "html_url": "https://github.com/bradtraversy"
+        },
+        "topics": ["javascript", "css", "html", "projects", "web-development"]
+      },
+      "metadata": {
+        "author": "Brad Traversy",
+        "tags": ["Web Development", "JavaScript", "Projects", "CSS", "HTML"],
+        "difficulty": "intermediate",
+        "estimatedTime": "50 days",
+        "prerequisites": ["Basic HTML, CSS, and JavaScript knowledge"],
+        "lastUpdated": "2024-02-20T14:15:00Z"
+      },
+      "featured": true,
+      "category": "Web Development",
+      "slug": "50-projects-50-days"
+    },
+    {
+      "id": "nextjs-framework",
+      "title": "Next.js - The React Framework for Production",
+      "description": "Learn Next.js, the React framework for production",
+      "repository": {
+        "name": "next.js",
+        "full_name": "vercel/next.js",
+        "description": "The React Framework for Production",
+        "html_url": "https://github.com/vercel/next.js",
+        "stargazers_count": 120000,
+        "forks_count": 25000,
+        "language": "TypeScript",
+        "updated_at": "2024-03-10T09:45:00Z",
+        "created_at": "2016-10-25T00:00:00Z",
+        "owner": {
+          "login": "vercel",
+          "avatar_url": "https://avatars.githubusercontent.com/u/14985020?v=4",
+          "html_url": "https://github.com/vercel"
+        },
+        "topics": ["react", "nextjs", "typescript", "javascript", "framework"]
+      },
+      "metadata": {
+        "author": "Vercel",
+        "tags": ["React", "Next.js", "TypeScript", "Framework", "Full Stack"],
+        "difficulty": "intermediate",
+        "estimatedTime": "8 weeks",
+        "prerequisites": ["JavaScript", "React basics"],
+        "lastUpdated": "2024-03-10T09:45:00Z"
+      },
+      "featured": true,
+      "category": "React",
+      "slug": "nextjs-framework"
+    },
+    {
+      "id": "python-beginners",
+      "title": "Python for Beginners",
+      "description": "Course materials for Python for Beginners",
+      "repository": {
+        "name": "python-for-beginners",
+        "full_name": "microsoft/python-for-beginners",
+        "description": "Course materials for Python for Beginners",
+        "html_url": "https://github.com/microsoft/python-for-beginners",
+        "stargazers_count": 35000,
+        "forks_count": 6000,
+        "language": "Python",
+        "updated_at": "2024-01-30T11:20:00Z",
+        "created_at": "2021-06-01T00:00:00Z",
+        "owner": {
+          "login": "microsoft",
+          "avatar_url": "https://avatars.githubusercontent.com/u/6154722?v=4",
+          "html_url": "https://github.com/microsoft"
+        },
+        "topics": ["python", "beginner", "tutorial", "learning"]
+      },
+      "metadata": {
+        "author": "Microsoft",
+        "tags": ["Python", "Beginner", "Programming", "Learning"],
+        "difficulty": "beginner",
+        "estimatedTime": "10 weeks",
+        "prerequisites": ["Basic computer skills"],
+        "lastUpdated": "2024-01-30T11:20:00Z"
+      },
+      "featured": true,
+      "category": "Python",
+      "slug": "python-for-beginners"
+    },
+    {
+      "id": "ml-beginners",
+      "title": "Machine Learning for Beginners",
+      "description": "A 12-week, 26-lesson curriculum all about Machine Learning",
+      "repository": {
+        "name": "ML-For-Beginners",
+        "full_name": "microsoft/ML-For-Beginners",
+        "description": "A 12-week, 26-lesson curriculum all about Machine Learning",
+        "html_url": "https://github.com/microsoft/ML-For-Beginners",
+        "stargazers_count": 55000,
+        "forks_count": 9000,
+        "language": "Python",
+        "updated_at": "2024-02-15T16:30:00Z",
+        "created_at": "2020-12-01T00:00:00Z",
+        "owner": {
+          "login": "microsoft",
+          "avatar_url": "https://avatars.githubusercontent.com/u/6154722?v=4",
+          "html_url": "https://github.com/microsoft"
+        },
+        "topics": ["machine-learning", "python", "ai", "tutorial", "beginner"]
+      },
+      "metadata": {
+        "author": "Microsoft",
+        "tags": ["Machine Learning", "Python", "AI", "Data Science", "Beginner"],
+        "difficulty": "beginner",
+        "estimatedTime": "12 weeks",
+        "prerequisites": ["Python basics", "High school math"],
+        "lastUpdated": "2024-02-15T16:30:00Z"
+      },
+      "featured": true,
+      "category": "Machine Learning",
+      "slug": "machine-learning-for-beginners"
+    },
+    {
+      "id": "system-design-primer",
+      "title": "System Design Primer",
+      "description": "Learn how to design large-scale systems",
+      "repository": {
+        "name": "system-design-primer",
+        "full_name": "donnemartin/system-design-primer",
+        "description": "Learn how to design large-scale systems",
+        "html_url": "https://github.com/donnemartin/system-design-primer",
+        "stargazers_count": 250000,
+        "forks_count": 45000,
+        "language": "Python",
+        "updated_at": "2024-01-20T13:45:00Z",
+        "created_at": "2017-02-01T00:00:00Z",
+        "owner": {
+          "login": "donnemartin",
+          "avatar_url": "https://avatars.githubusercontent.com/u/5458997?v=4",
+          "html_url": "https://github.com/donnemartin"
+        },
+        "topics": ["system-design", "architecture", "scalability", "distributed-systems"]
+      },
+      "metadata": {
+        "author": "Donne Martin",
+        "tags": ["System Design", "Architecture", "Scalability", "Distributed Systems"],
+        "difficulty": "advanced",
+        "estimatedTime": "16 weeks",
+        "prerequisites": ["Data structures", "Algorithms", "Basic networking"],
+        "lastUpdated": "2024-01-20T13:45:00Z"
+      },
+      "featured": true,
+      "category": "System Design",
+      "slug": "system-design-primer"
+    },
+    {
+      "id": "react-native",
+      "title": "React Native",
+      "description": "Build mobile apps using React",
+      "repository": {
+        "name": "react-native",
+        "full_name": "facebook/react-native",
+        "description": "Build mobile apps using React",
+        "html_url": "https://github.com/facebook/react-native",
+        "stargazers_count": 115000,
+        "forks_count": 24000,
+        "language": "JavaScript",
+        "updated_at": "2024-03-12T08:30:00Z",
+        "created_at": "2015-01-09T00:00:00Z",
+        "owner": {
+          "login": "facebook",
+          "avatar_url": "https://avatars.githubusercontent.com/u/69631?v=4",
+          "html_url": "https://github.com/facebook"
+        },
+        "topics": ["react-native", "mobile", "javascript", "ios", "android"]
+      },
+      "metadata": {
+        "author": "Facebook",
+        "tags": ["React Native", "Mobile Development", "JavaScript", "iOS", "Android"],
+        "difficulty": "intermediate",
+        "estimatedTime": "10 weeks",
+        "prerequisites": ["React", "JavaScript", "Mobile development basics"],
+        "lastUpdated": "2024-03-12T08:30:00Z"
+      },
+      "category": "Mobile",
+      "slug": "react-native"
+    },
+    {
+      "id": "flutter",
+      "title": "Flutter",
+      "description": "Build beautiful native apps on iOS and Android",
+      "repository": {
+        "name": "flutter",
+        "full_name": "flutter/flutter",
+        "description": "Build beautiful native apps on iOS and Android",
+        "html_url": "https://github.com/flutter/flutter",
+        "stargazers_count": 180000,
+        "forks_count": 30000,
+        "language": "Dart",
+        "updated_at": "2024-03-15T12:00:00Z",
+        "created_at": "2015-05-20T00:00:00Z",
+        "owner": {
+          "login": "flutter",
+          "avatar_url": "https://avatars.githubusercontent.com/u/31792833?v=4",
+          "html_url": "https://github.com/flutter"
+        },
+        "topics": ["flutter", "dart", "mobile", "ios", "android", "ui"]
+      },
+      "metadata": {
+        "author": "Google",
+        "tags": ["Flutter", "Dart", "Mobile Development", "UI", "Cross-platform"],
+        "difficulty": "intermediate",
+        "estimatedTime": "12 weeks",
+        "prerequisites": ["Programming basics", "OOP concepts"],
+        "lastUpdated": "2024-03-15T12:00:00Z"
+      },
+      "category": "Mobile",
+      "slug": "flutter"
+    },
+    {
+      "id": "docker-getting-started",
+      "title": "Docker Getting Started",
+      "description": "Getting started with Docker",
+      "repository": {
+        "name": "getting-started",
+        "full_name": "docker/getting-started",
+        "description": "Getting started with Docker",
+        "html_url": "https://github.com/docker/getting-started",
+        "stargazers_count": 8000,
+        "forks_count": 1500,
+        "language": "Markdown",
+        "updated_at": "2024-02-28T10:15:00Z",
+        "created_at": "2019-01-01T00:00:00Z",
+        "owner": {
+          "login": "docker",
+          "avatar_url": "https://avatars.githubusercontent.com/u/5429470?v=4",
+          "html_url": "https://github.com/docker"
+        },
+        "topics": ["docker", "containers", "devops", "tutorial"]
+      },
+      "metadata": {
+        "author": "Docker",
+        "tags": ["Docker", "Containers", "DevOps", "Deployment"],
+        "difficulty": "beginner",
+        "estimatedTime": "4 weeks",
+        "prerequisites": ["Basic command line knowledge"],
+        "lastUpdated": "2024-02-28T10:15:00Z"
+      },
+      "category": "DevOps",
+      "slug": "docker-getting-started"
+    },
+    {
+      "id": "kubernetes",
+      "title": "Kubernetes",
+      "description": "Production-Grade Container Scheduling and Management",
+      "repository": {
+        "name": "kubernetes",
+        "full_name": "kubernetes/kubernetes",
+        "description": "Production-Grade Container Scheduling and Management",
+        "html_url": "https://github.com/kubernetes/kubernetes",
+        "stargazers_count": 105000,
+        "forks_count": 40000,
+        "language": "Go",
+        "updated_at": "2024-03-14T15:20:00Z",
+        "created_at": "2014-06-07T00:00:00Z",
+        "owner": {
+          "login": "kubernetes",
+          "avatar_url": "https://avatars.githubusercontent.com/u/13629408?v=4",
+          "html_url": "https://github.com/kubernetes"
+        },
+        "topics": ["kubernetes", "containers", "orchestration", "cloud-native"]
+      },
+      "metadata": {
+        "author": "Cloud Native Computing Foundation",
+        "tags": ["Kubernetes", "Containers", "Orchestration", "Cloud Native"],
+        "difficulty": "advanced",
+        "estimatedTime": "14 weeks",
+        "prerequisites": ["Docker", "Linux administration", "Networking basics"],
+        "lastUpdated": "2024-03-14T15:20:00Z"
+      },
+      "category": "DevOps",
+      "slug": "kubernetes"
+    }
+  ]
+} 

@@ -3,93 +3,132 @@
   <img src=".github/assets/waver-128.png" alt="Project Logo" width="128">
 </p>
 <h2 align="center">
-  <b> Waver - An easy to use code tutorial generator </b>
+  <b> Waver - An AI-Powered Code Tutorial Generator </b>
 </h2>
 
-Waver is a command-line tool that generates code tutorials from source code using Large Language Models (LLMs). It analyzes the source code, identifies abstractions and relationships, and generates a structured tutorial with chapters.
+Waver is a comprehensive platform that generates interactive code tutorials from source code using Large Language Models (LLMs). It analyzes source code to identify abstractions and relationships, then generates structured tutorials with chapters that can be consumed through multiple interfaces.
 
-## Features
+## Architecture Overview
 
-- Analyzes source code to identify abstractions and relationships
-- Generates structured tutorials with chapters
-- Supports multiple LLM providers (Gemini, OpenAI)
-- Colorized output for better readability
-- Progress indicators for long-running operations
-- Multiple output formats (Markdown, HTML, PDF)
-- Shell auto-completion
+Waver is distributed across four main components, each serving a specific purpose in the tutorial generation and consumption pipeline:
 
-## Installation
+```mermaid
+graph TB
+    A[waver-site<br/>Next.js Web Interface] -->|Cloud Event| B[waver-backend<br/>Knative Function]
+    B -->|Uses| C[waver-core<br/>Core Logic & Tasks]
+    B -->|Stores| D[MinIO Bucket<br/>Tutorial Storage]
+    A -->|Loads| D
+    E[waver-cli<br/>Command Line Tool] -->|Uses| C
+    
+    subgraph "Core Components"
+        C
+        C --> F[Task Pipeline]
+        C --> G[Tutorial Generation]
+    end
+    
+    subgraph "Storage & Distribution"
+        D
+        D --> I[waver-config.json<br/>Metadata Files]
+        D --> J[Generated Tutorials<br/>Markdown/HTML/PDF]
+    end
+    
+    subgraph "User Interfaces"
+        A
+        E
+    end
+```
+
+## Component Overview
+
+### 🧠 [waver-core](waver-core/README.md)
+The heart of the Waver platform containing:
+- **Task Pipeline Framework**: `Task`, `TaskPipeline`, and `PipelineContext` classes
+- **Tutorial Generation Engine**: Core logic for analyzing code and generating structured tutorials
+- **Code Analysis**: Abstractions identification, relationship analysis, and chapter organization
+- **LLM Integration**: Support for multiple providers (OpenAI, Gemini) via LangChain4j
+
+### 🖥️ [waver-cli](waver-cli/README.md)
+Command-line interface that leverages waver-core:
+- **Local Processing**: Generate tutorials from local directories or Git repositories
+- **Multiple Output Formats**: Markdown, HTML, and PDF generation
+- **Native Builds**: GraalVM native-image compilation for optimal performance
+- **Uber JAR**: Self-contained executable with all dependencies
+
+### ⚡ [waver-backend](waver-backend/README.md)
+Serverless function built with Quarkus:
+- **Cloud Event Processing**: Receives tutorial generation requests from waver-site
+- **Git Repository Processing**: Clones and analyzes remote repositories
+- **MinIO Integration**: Stores generated tutorials and metadata in S3-compatible storage
+- **waver-config.json**: Produces metadata files for each tutorial
+
+### 🌐 [waver-site](waver-site/README.md)
+Modern web interface built with Next.js:
+- **Tutorial Request Interface**: Submit Git URLs for tutorial generation
+- **Cloud Event Dispatch**: Sends requests to waver-backend via Knative
+- **Tutorial Display**: Renders generated tutorials with interactive features
+- **MinIO Integration**: Loads and displays tutorials from storage bucket
+
+## Key Features
+
+- **Intelligent Code Analysis**: Identifies abstractions, relationships, and architectural patterns
+- **Multi-Format Output**: Generate tutorials in Markdown, HTML, or PDF formats
+- **Cloud-Native Architecture**: Serverless backend with event-driven processing
+- **Multiple Access Patterns**: CLI for developers, web interface for end users
+- **S3-Compatible Storage**: Scalable storage with MinIO integration
+- **LLM Provider Flexibility**: Support for OpenAI, Gemini, and extensible architecture
+
+## Quick Start
 
 ### Prerequisites
-
 - Java 21 or higher
-- Gradle 8.0 or higher
-- An API key for Gemini or OpenAI
+- Maven 3.8 or higher
+- Node.js 18+ (for waver-site)
+- MinIO or S3-compatible storage
+- LLM API keys (OpenAI, Gemini)
 
-### Building from Source
+### Building the Entire Project
+```bash
+# Build all Java components
+mvn clean install
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/yourusername/waver.git
-   cd waver
-   ```
-
-2. Build the project:
-   ```
-   ./gradlew build
-   ```
-
-For more detailed build instructions, including native compilation, see [Developers.md](DEVELOPERS.md).
-
-## Usage
-
-### Basic Usage
-
-#### From Local Directory
-```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini
+# Build the web interface
+cd waver-site
+npm install
+npm run build
 ```
 
-#### From GitHub Repository
-```
-waver --input https://github.com/user/repo.git --output ./tutorials --project-name "My Project" --llm-provider Gemini
-```
+### Running Individual Components
 
-### Command-Line Options
-
-- `--input <path>`: The path to the source code files to analyze (required)
-- `--output <directory>`: The directory where generated markdown files will be stored (required)
-- `--project-name <n>`: The name of the project (required)
-- `--llm-provider <provider>`: The LLM provider to use (OpenAI, Gemini)
-- `--format <format>`: Output format for the generated tutorial (MARKDOWN, HTML, PDF)
-- `-v, --verbose`: Enable verbose output for debugging
-- `-h, --help`: Show help message and exit
-- `-V, --version`: Print version information and exit
-
-### Environment Variables
-
-- `OPENAI_API_KEY`: API key for OpenAI (required if using OpenAI provider)
-- `GEMINI_AI_KEY`: API key for Gemini (required if using Gemini provider)
-
-## Examples
-
-### Generate a Tutorial from Local Code or Git url
-
-```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini
+#### CLI Tool
+```bash
+# From waver-cli directory
+mvn clean package -pl waver-cli
+java -jar target/waver-cli-1.0-SNAPSHOT.jar --help
 ```
 
-### Generate a Tutorial with HTML Output
+#### Backend Function
+```bash
+# From waver-backend directory
+mvn clean package -pl waver-backend
+java -jar target/quarkus-app/quarkus-run.jar
+```
 
+#### Web Interface
+```bash
+# From waver-site directory
+npm run dev
+# Open http://localhost:3000
 ```
-waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini --format HTML
-```
+
+## Development
+
+- **Core Development**: [waver-core/README.md](waver-core/README.md)
+- **CLI Development**: [waver-cli/README.md](waver-cli/README.md)
+- **Backend Development**: [waver-backend/README.md](waver-backend/README.md)
+- **Web Development**: [waver-site/README.md](waver-site/README.md)
 
 ## Documentation
 
-- [Developers Guide](DEVELOPERS.md): Detailed information for developers working on Waver
-- [Contributors Guide](CONTRIBUTORS.md): Guidelines for contributing to the project
-
-## License
-
-This project is distributed under the MIT License. See the `LICENSE` file for more information.
+- [Developers Guide](docs/DEVELOPERS.md): Detailed information for developers working on Waver
+- [Contributors Guide](docs/CONTRIBUTORS.md): Guidelines for contributing to the project
+- [Maven Build Guide](docs/README-MAVEN.md): Comprehensive build and deployment instructions

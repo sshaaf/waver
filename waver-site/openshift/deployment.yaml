@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waver-site
+  labels:
+    app: waver-site
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: waver-site
+  template:
+    metadata:
+      labels:
+        app: waver-site
+    spec:
+      containers:
+      - name: waver-site
+        image: quay.io/${QUAY_NAMESPACE}/waver-site:${IMAGE_TAG}
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: MINIO_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: waver-site-config
+              key: minio-endpoint
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: waver-site-secrets
+              key: minio-access-key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: waver-site-secrets
+              key: minio-secret-key
+        - name: MINIO_BUCKET
+          valueFrom:
+            configMapKeyRef:
+              name: waver-site-config
+              key: minio-bucket
+        - name: CLOUD_EVENT_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: waver-site-config
+              key: cloud-event-service-url
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      restartPolicy: Always
