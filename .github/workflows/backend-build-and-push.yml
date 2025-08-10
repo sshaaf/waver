@@ -52,7 +52,7 @@ jobs:
       - name: Run tests and build project
         # This step verifies that the project compiles and tests pass.
         # It runs for both PRs and pushes to main.
-        run: mvn -B install
+        run: mvn clean install
 
       - name: Log in to Quay.io
         # This step is safe to run for both events.
