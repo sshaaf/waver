@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0           http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -30,8 +27,7 @@
         <quarkus.native.container-runtime>docker</quarkus.native.container-runtime>
         <quarkus.native.builder-image>quay.io/quarkus/quarkus-micro-image:2.0</quarkus.native.builder-image>
         <quarkus.native.runtime-image>quay.io/quarkus/quarkus-micro-image:2.0</quarkus.native.runtime-image>
-        <quarkus.native.additional-build-args>
-            --initialize-at-build-time=dev.shaaf.waver
+        <quarkus.native.additional-build-args>--initialize-at-build-time=dev.shaaf.waver
             --initialize-at-build-time=dev.langchain4j
             --initialize-at-build-time=com.fasterxml.jackson
             --initialize-at-build-time=org.slf4j
@@ -47,8 +43,7 @@
             --enable-https
             --enable-url-protocols=https
             -H:+ReportExceptionStackTraces
-            -H:+UnlockExperimentalVMOptions
-        </quarkus.native.additional-build-args>
+            -H:+UnlockExperimentalVMOptions</quarkus.native.additional-build-args>
     </properties>
 
     <dependencyManagement>
@@ -129,6 +124,10 @@
         </dependency>
 
         <!-- Testing -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
+        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
@@ -222,4 +221,4 @@
             </properties>
         </profile>
     </profiles>
-</project> 
+</project>

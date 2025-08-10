@@ -62,9 +62,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        cd waver-backend
         # Build and push with SHA tag
-        mvn clean package -Dquarkus.container-image.build=true \
+        mvn clean package -pl waver-backend -Dquarkus.container-image.build=true \
           -Dquarkus.container-image.push=true \
           -Dquarkus.container-image.registry=quay.io \
           -Dquarkus.container-image.group=${{ env.QUAY_NAMESPACE }} \
