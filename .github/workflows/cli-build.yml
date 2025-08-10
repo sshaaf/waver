@@ -62,7 +62,7 @@ jobs:
           native-image-job-reports: 'true'
       
       - name: Build Native Image
-        run: mvn clean package -pl waver-cli -Pnative
+        run: mvn clean install -Pnative
       
       - name: Upload Linux Native Executable
         uses: actions/upload-artifact@v4
@@ -86,7 +86,7 @@ jobs:
           native-image-job-reports: 'true'
       
       - name: Build Native Image
-        run: mvn clean package -pl waver-cli -Pnative
+        run: mvn clean install -Pnative
       
       - name: Upload macOS Native Executable
         uses: actions/upload-artifact@v4
@@ -110,7 +110,7 @@ jobs:
           native-image-job-reports: 'true'
       
       - name: Build Native Image
-        run: mvn clean package -pl waver-cli -Pnative
+        run: mvn clean install -Pnative
       
       - name: Upload Windows Native Executable
         uses: actions/upload-artifact@v4
