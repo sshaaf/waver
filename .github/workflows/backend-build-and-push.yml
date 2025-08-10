@@ -48,17 +48,25 @@ jobs:
     - name: Build and push Docker image
       run: |
         cd waver-backend
+        # Build and push with SHA tag
         mvn clean package -Dquarkus.container-image.build=true \
           -Dquarkus.container-image.push=true \
           -Dquarkus.container-image.registry=quay.io \
           -Dquarkus.container-image.group=${{ env.QUAY_NAMESPACE }} \
           -Dquarkus.container-image.name=${{ env.IMAGE_NAME }} \
           -Dquarkus.container-image.tag=${{ steps.git-sha.outputs.sha }}
+        
+        # Also tag and push as latest
+        docker tag ${{ env.QUAY_REPOSITORY }}:${{ steps.git-sha.outputs.sha }} ${{ env.QUAY_REPOSITORY }}:latest
+        docker push ${{ env.QUAY_REPOSITORY }}:latest
 
     - name: Output image info
       run: |
         echo "✅ Successfully built and pushed image:"
         echo "   Repository: ${{ env.QUAY_REPOSITORY }}"
-        echo "   Tag: ${{ steps.git-sha.outputs.sha }}"
+        echo "   SHA Tag: ${{ steps.git-sha.outputs.sha }}"
+        echo "   Latest Tag: latest"
         echo "   Full SHA: ${{ steps.git-sha.outputs.full-sha }}"
-        echo "   Image URL: ${{ env.QUAY_REPOSITORY }}:${{ steps.git-sha.outputs.sha }}"
+        echo "   Image URLs:"
+        echo "     ${{ env.QUAY_REPOSITORY }}:${{ steps.git-sha.outputs.sha }}"
+        echo "     ${{ env.QUAY_REPOSITORY }}:latest"
