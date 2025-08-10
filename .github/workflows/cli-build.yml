@@ -38,7 +38,6 @@ jobs:
           distribution: 'graalvm' # See 'Supported distributions' for available options
           java-version: '21'
       - run: mvn clean install
-      - run: mvn test
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
@@ -60,9 +59,10 @@ jobs:
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
+      - run: mvn clean install
       
       - name: Build Native Image
-        run: mvn clean install -Pnative
+        run: mvn package -pl waver-cli -Pnative
       
       - name: Upload Linux Native Executable
         uses: actions/upload-artifact@v4
@@ -84,9 +84,10 @@ jobs:
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
-      
+      - run: mvn clean install
+
       - name: Build Native Image
-        run: mvn clean install -Pnative
+        run: mvn package -pl waver-cli -Pnative
       
       - name: Upload macOS Native Executable
         uses: actions/upload-artifact@v4
@@ -100,7 +101,35 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      
+
+      - name: Set up Visual Studio Developer Command Prompt
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Set up Visual C++ Build Tools
+        shell: powershell
+        run: |
+          # Add Visual C++ build tools to PATH
+          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          $vcvarsallPath = Join-Path $vsPath "VC\Auxiliary\Build\vcvarsall.bat"
+          
+          # Create a batch file to set up the environment
+          Set-Content -Path setup-env.bat -Value "@call `"$vcvarsallPath`" x64"
+          
+          # Execute the batch file and export the environment variables
+          cmd /c "setup-env.bat && set > env-vars.txt"
+          
+          # Read the environment variables and set them for the current process
+          Get-Content env-vars.txt | ForEach-Object {
+            if ($_ -match "^([^=]+)=(.*)$") {
+              $name = $matches[1]
+              $value = $matches[2]
+              # Set environment variable for the current process
+              [System.Environment]::SetEnvironmentVariable($name, $value)
+              # Also set it for GitHub Actions
+              echo "$name=$value" >> $env:GITHUB_ENV
+            }
+          }
+
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -108,40 +137,13 @@ jobs:
           distribution: 'graalvm'
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
-      
+      - run: mvn clean install
+
       - name: Build Native Image
-        run: mvn clean install -Pnative
+        run: mvn package -pl waver-cli -Pnative
       
       - name: Upload Windows Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-windows
           path: waver-cli/target/waver-cli.exe
-
-#  release:
-#    name: Create Release
-#    needs: [native-linux, native-macos, native-windows]
-#    runs-on: ubuntu-latest
-#    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-#    permissions:
-#      contents: write
-#    steps:
-#      - name: Download all artifacts
-#        uses: actions/download-artifact@v4
-#        with:
-#          path: artifacts
-#
-#      - name: Create Release
-#        id: create_release
-#        uses: softprops/action-gh-release@v1
-#        with:
-#          name: Release ${{ github.sha }}
-#          tag_name: release-${{ github.run_number }}
-#          draft: false
-#          prerelease: false
-#          files: |
-#            artifacts/waver-jar/*.jar
-#            artifacts/waver-linux/waver-cli
-#            artifacts/waver-macos/waver-cli
-#            artifacts/waver-windows/waver-cli.exe
-#          token: ${{ secrets.GITHUB_TOKEN }}
