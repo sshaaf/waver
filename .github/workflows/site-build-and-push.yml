@@ -1,60 +1,49 @@
 name: Build and Push site
 
 on:
-  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
-
+# Define an environment variable for the image name to keep the workflow clean
 env:
-  QUAY_NAMESPACE: sshaaf
-  IMAGE_NAME: waver-site
-  QUAY_REPOSITORY: quay.io/sshaaf/waver-site
+  IMAGE_NAME: quay.io/sshaaf/waver-site
 
 jobs:
   build-and-push:
-    environment: build
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        path: waver-site
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Log in to Quay.io
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USER }}
+          password: ${{ secrets.QUAY_TOKEN }}
 
-    - name: Get Git SHA
-      id: git-sha
-      run: |
-        echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        echo "full-sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          # Creates tags like:
+          # - type=sha,prefix=,format=short (e.g., a1b2c3d4)
+          # - type=raw,value=latest,enable={{is_default_branch}} (e.g., latest for main branch)
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
 
-    - name: Log in to Quay.io
-      uses: docker/login-action@v3
-      with:
-        registry: quay.io
-        username: ${{ secrets.QUAY_USERNAME }}
-        password: ${{ secrets.QUAY_PASSWORD }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./waver-site
-        push: true
-        tags: |
-          ${{ env.QUAY_REPOSITORY }}:${{ steps.git-sha.outputs.sha }}
-          ${{ env.QUAY_REPOSITORY }}:latest
-        cache-from: type:gha
-        cache-to: type:gha,mode=max
-        platforms: linux/amd64,linux/arm64
-
-    - name: Output image info
-      run: |
-        echo "✅ Successfully built and pushed image:"
-        echo "   Repository: ${{ env.QUAY_REPOSITORY }}"
-        echo "   SHA Tag: ${{ steps.git-sha.outputs.sha }}"
-        echo "   Latest Tag: latest"
-        echo "   Full SHA: ${{ steps.git-sha.outputs.full-sha }}"
-        echo "   Image URLs:"
-        echo "     ${{ env.QUAY_REPOSITORY }}:${{ steps.git-sha.outputs.sha }}"
-        echo "     ${{ env.QUAY_REPOSITORY }}:latest"
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          # The context is the subfolder containing the Dockerfile
+          context: ./waver-site
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
