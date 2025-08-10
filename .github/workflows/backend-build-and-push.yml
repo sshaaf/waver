@@ -26,11 +26,6 @@ jobs:
       contents: read
       packages: write
 
-    # Set a default working directory for all steps
-    defaults:
-      run:
-        working-directory: waver-backend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,6 +35,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+      - run: mvn -B install
 
       - name: Cache Maven packages
         uses: actions/cache@v4
@@ -48,11 +44,6 @@ jobs:
           key: ${{ runner.os }}-maven-backend-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-backend-
-
-      - name: Run tests and build project
-        # This step verifies that the project compiles and tests pass.
-        # It runs for both PRs and pushes to main.
-        run: mvn clean install
 
       - name: Log in to Quay.io
         # This step is safe to run for both events.
