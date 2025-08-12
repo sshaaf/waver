@@ -26,6 +26,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>dev.shaaf.waver</groupId>
+            <artifactId>waver-llm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Langchain4j dependencies -->
         <dependency>
             <groupId>dev.langchain4j</groupId>

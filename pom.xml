@@ -15,6 +15,7 @@
 
     <modules>
         <module>waver-core</module>
+        <module>waver-llm</module>
         <module>waver-cli</module>
         <module>waver-backend</module>
     </modules>
