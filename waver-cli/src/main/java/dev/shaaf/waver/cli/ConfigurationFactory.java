@@ -23,7 +23,7 @@ public class ConfigurationFactory {
                 args.llmProvider,
                 providerConfig.getApiKey(),
                 args.verbose,
-                args.projectName,
+                "My Project",
                 args.outputFormat,
                 args.generationType
         );

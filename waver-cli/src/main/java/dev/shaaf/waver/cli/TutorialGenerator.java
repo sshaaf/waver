@@ -35,11 +35,23 @@ public class TutorialGenerator {
 
         logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
         try {
-            CompletableFuture<Object> generationContext = tasksPipeLine.run(appConfig.inputPath());
-            logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
+            CompletableFuture<Object> generationFuture = tasksPipeLine.run(appConfig.inputPath());
+
+            CompletableFuture<Void> finalResult = generationFuture.thenAccept(result -> {
+                logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
+            }).exceptionally(ex -> {
+                logger.severe("❌ Tutorial generation failed: " + ex.getMessage());
+                throw new RuntimeException("Tutorial generation failed", ex);
+            });
+
+            finalResult.join();
+
         } catch (Exception e) {
-            logger.severe("❌ Tutorial generation failed: " + e.getMessage());
-            throw new RuntimeException("Tutorial generation failed", e);
+            // The exception from the .exceptionally() block will be caught here
+            // No need to log again, just re-throw or exit.
+            System.err.println("A critical error occurred. Exiting.");
+            // Optionally re-throw if this is part of a larger method
+            // throw e;
         }
 
     }

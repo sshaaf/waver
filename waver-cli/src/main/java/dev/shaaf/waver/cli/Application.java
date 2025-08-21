@@ -27,9 +27,6 @@ public class Application {
                 case TUTORIAL:
                     TutorialGenerator.generate(appConfig);
                     break;
-                case RULES:
-                    RewriteRulesConverter.generate(appConfig);
-                    break;
                 case DOCUMENTATION:
                 case BLOG:
                     throw new UnsupportedOperationException(appConfig.generationType() + " generation is not yet implemented.");

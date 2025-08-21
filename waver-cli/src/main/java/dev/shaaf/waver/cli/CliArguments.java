@@ -24,10 +24,10 @@ import java.io.File;
         optionListHeading = "%n@|bold,fg(yellow) Options:|@%n",
         footerHeading = "%n@|bold,fg(yellow) Examples:|@%n",
         footer = """
-                @|fg(green)  waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider OpenAI|@
+                @|fg(green)  waver --input ./my-project --output ./tutorials --type tutorial --llm-provider OpenAI|@
                   Generate a tutorial for "My Project" using OpenAI
                   
-                @|fg(green)  waver --input ./my-project --output ./tutorials --project-name "My Project" --llm-provider Gemini --verbose|@
+                @|fg(green)  waver --input ./my-project --output ./tutorials --type tutorial --llm-provider Gemini --verbose|@
                   Generate a tutorial with verbose logging using Gemini
                 """
 )
@@ -38,9 +38,6 @@ public class CliArguments {
 
     @Option(names = "--output", required = true, description = "The directory where generated markdown files will be stored.", paramLabel = "<directory>")
     public File outputPath;
-
-    @Option(names = "--project-name", required = true, description = "The name of the project.", paramLabel = "<name>")
-    public String projectName;
 
     @Option(names = {"-t", "--type"}, required = true, description = "The type of content to generate. Valid values: ${COMPLETION-CANDIDATES}.", paramLabel = "<Generation type>")
     public GenerationType generationType;
