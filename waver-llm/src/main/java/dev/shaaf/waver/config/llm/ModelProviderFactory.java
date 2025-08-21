@@ -12,7 +12,7 @@ public class ModelProviderFactory {
 
     static HashMap<LLMProvider, ModelType> providerModelMap = new HashMap<LLMProvider, ModelType>() {{
         put(LLMProvider.OpenAI, ModelType.OPENAI_GPT_4_MINI);
-        put(LLMProvider.Gemini, ModelType.GEMINI_1_5_FLASH);
+        put(LLMProvider.Gemini, ModelType.GEMINI_1_5_PRO);
     }};
 
     public static ChatModel buildChatModel(LLMProvider llmProvider, String apiKey) {

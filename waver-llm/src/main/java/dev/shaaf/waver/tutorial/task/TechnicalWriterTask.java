@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TechnicalWriterTask implements Task<GenerationContext, GenerationContext> {
     // Get a logger instance for this class
@@ -43,8 +44,14 @@ public class TechnicalWriterTask implements Task<GenerationContext, GenerationCo
                 introChapterContent.append(introChapter.writeChapter(generationContext.abstractionsAsString(), generationContext.codeAsString()));
                 introChapterContent.append("## Chapters\n\n");
 
-                List<CompletableFuture<String>> chapterFutures = generationContext.chapterList().chapterList().stream()
-                        .map(chapter -> writeChapterAsync(generationContext, writer, chapter))
+                List<Chapter> chapters = generationContext.chapterList().chapterList();
+                List<CompletableFuture<String>> chapterFutures = IntStream.range(0, chapters.size())
+                        .mapToObj(index -> {
+                            // Get the chapter corresponding to the current index
+                            Chapter chapter = chapters.get(index);
+                            // Pass both the chapter and the index to your async method
+                            return writeChapterAsync(generationContext, writer, chapter, index);
+                        })
                         .collect(Collectors.toList());
 
                 CompletableFuture.allOf(chapterFutures.toArray(new CompletableFuture[0])).join();
@@ -67,7 +74,7 @@ public class TechnicalWriterTask implements Task<GenerationContext, GenerationCo
         });
     }
 
-    private CompletableFuture<String> writeChapterAsync(GenerationContext generationContext, TutorialWriter writer, Chapter chapter) {
+    private CompletableFuture<String> writeChapterAsync(GenerationContext generationContext, TutorialWriter writer, Chapter chapter, Integer index) {
         return CompletableFuture.supplyAsync(() -> {
             logger.info("     - Writing chapter: " + chapter.name());
 
@@ -81,16 +88,27 @@ public class TechnicalWriterTask implements Task<GenerationContext, GenerationCo
                     .map(cf -> "--- File: " + cf.path() + " ---\n" + cf.content())
                     .collect(Collectors.joining("\n\n"));
 
-            String chapterContent = writer.writeChapter(generationContext.abstractionsAsString(), chapter.name(), relevantCode);
+            StringBuilder chapterContent = new StringBuilder();
+            // counter should start at 1
+            int chapterIndex = index + 1;
+            String chapterFileName = getChapterFileName(chapter.name(), chapterIndex);
+            chapterContent.append(getChapterFrontMatter(chapter.name(), chapterIndex));
+            chapterContent.append(writer.writeChapter(generationContext.abstractionsAsString(), chapter.name(), relevantCode));
 
-            writeChapterToDisk(outputDir, getChapterFileName(chapter.name()), chapterContent);
-
-            return String.format("* [%s](./%s)\n", chapter.name(), getChapterFileName(chapter.name()));
+            writeChapterToDisk(outputDir, getChapterFileName(chapter.name(), chapterIndex), chapterContent.toString());
+            return String.format("* [%s](./%s)\n", chapter.name(), getChapterFileName(chapter.name(), chapterIndex));
         });
     }
 
-    private String getChapterFileName(String chapterName) {
-        return String.format("%s.md", chapterName.replaceAll("\\s+", "-"));
+    private String getChapterFileName(String chapterName, int index) {
+        return String.format("%d-%s.md", index, chapterName.replaceAll("\\s+", "-"));
+    }
+
+    public String getChapterFrontMatter(String chapterName, int index) {
+        return String.format("---\n" +
+                "title: \"Chapter %d: %s\"\n" +
+                "order: %d\n" +
+                "---\n", index, chapterName, index);
     }
 
     private void writeChapterToDisk(Path outputDir, String fileName, String content) {

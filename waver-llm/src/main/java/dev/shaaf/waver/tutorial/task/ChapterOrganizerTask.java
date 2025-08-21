@@ -24,6 +24,7 @@ public class ChapterOrganizerTask implements Task<GenerationContext, GenerationC
                 ChapterOrderAnalyzer analyzer = AiServices.create(ChapterOrderAnalyzer.class, chatModel);
                 return generationContext.withChapterList(analyzer.determineChapterOrder(generationContext.abstractionsAsString()));
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new TaskRunException("Failed to organize chapters", e);
             }
         });
