@@ -3,24 +3,20 @@ package dev.shaaf.waver.backend.minio;
 
 import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
-
 import dev.shaaf.waver.backend.FileUtil;
-import dev.shaaf.waver.backend.config.MinioConfig;
-import dev.shaaf.waver.backend.process.BackendProcessingService;
-import dev.shaaf.waver.core.PipelineContext;
-import dev.shaaf.waver.core.Task;
-import dev.shaaf.waver.core.TaskRunException;
+import dev.shaaf.jgraphlet.PipelineContext;
+import dev.shaaf.jgraphlet.Task;
+import dev.shaaf.jgraphlet.TaskRunException;
 import dev.shaaf.waver.tutorial.model.GenerationContext;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+
 import java.util.stream.Stream;
 
 public class MinioUploaderTask implements Task<GenerationContext, UploadResult> {

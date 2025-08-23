@@ -1,6 +1,7 @@
 package dev.shaaf.waver.tutorial.task;
 
-import dev.shaaf.waver.core.PipelineContext;
+
+import dev.shaaf.jgraphlet.PipelineContext;
 import dev.shaaf.waver.tutorial.model.GenerationContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -1,26 +1,24 @@
 package dev.shaaf.waver.backend.process;
 
 import dev.langchain4j.model.chat.ChatModel;
+import dev.shaaf.jgraphlet.TaskPipeline;
 import dev.shaaf.waver.backend.FileUtil;
 import dev.shaaf.waver.backend.config.MinioConfig;
 import dev.shaaf.waver.backend.config.WaverConfig;
-import dev.shaaf.waver.backend.minio.MinioClientProducer;
 import dev.shaaf.waver.backend.minio.MinioUploaderTask;
 import dev.shaaf.waver.backend.WaverProcessEvent;
-import dev.shaaf.waver.backend.minio.UploadResult;
 import dev.shaaf.waver.config.AppConfig;
+import dev.shaaf.waver.config.GenerationType;
 import dev.shaaf.waver.config.ProviderConfig;
 import dev.shaaf.waver.config.llm.LLMProvider;
 import dev.shaaf.waver.config.llm.MissingConfigurationException;
 import dev.shaaf.waver.config.llm.ModelProviderFactory;
-import dev.shaaf.waver.core.TaskPipeline;
+
 import dev.shaaf.waver.tutorial.task.*;
 import io.minio.MinioClient;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
-import org.jetbrains.annotations.Blocking;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,10 +43,10 @@ public class BackendProcessingService {
 
     @Incoming("requests")
     public CompletionStage<Void> initAndRunPipeline(WaverProcessEvent event) {
-        logger.info("🚀 Event is invoked, starting my business: " + event.sourceUrl());
+        logger.info("🚀 Event is invoked, starting generation: " + event.sourceUrl());
         return CompletableFuture.runAsync(() -> {
             generate(event.sourceUrl());
-            logger.info("🚀 My business has ended. Good bye! " + event.sourceUrl());
+            logger.info("🚀 Generation has ended. Good bye! " + event.sourceUrl());
         });
     }
 
@@ -58,17 +56,16 @@ public class BackendProcessingService {
             throw new MissingConfigurationException("LLM API key is missing.");
         }
 
-
-
         generate(
-                new AppConfig(
-                        inputPath,
+                new AppConfig(inputPath,
                         getAbsolutePath(waverConfig.outputPath()),
                         waverConfig.llmProvider(),
                         providerConfig.getApiKey(),
                         waverConfig.verbose(),
                         FileUtil.getFolderNameFromInputPath(inputPath),
-                        waverConfig.outputFormat()));
+                        waverConfig.outputFormat(),
+                        GenerationType.TUTORIAL)
+        );
     }
 
     public String getAbsolutePath(String path) {
@@ -77,40 +74,24 @@ public class BackendProcessingService {
 
 
     public void generate(AppConfig appConfig) {
-
-        logger.info("starting generation process");
-
         logger.info(appConfig.toString());
 
         ChatModel chatModel = ModelProviderFactory.buildChatModel(appConfig.llmProvider(), appConfig.apiKey());
         Path outputDir = Paths.get(appConfig.absoluteOutputPath() + "/" +appConfig.projectName());
-        logger.info("starting generation process - building pipeline");
-        // TODO: Consider passing AppConfig into the constructor so shared config is simplified across tasks.
-        TaskPipeline tasksPipeLine = new TaskPipeline();
-        // Create a linear chain of tasks to execute
-
-        tasksPipeLine.add(new CodeCrawlerTask())
-                .then(new IdentifyAbstractionsTask(chatModel, appConfig.projectName()))
-                .then(new IdentifyRelationshipsTask(chatModel, appConfig.projectName()))
-                .then(new ChapterOrganizerTask(chatModel))
-                .then(new TechnicalWriterTask(chatModel, outputDir))
-                .then(new MetaInfoTask(chatModel, outputDir, appConfig.projectName(), appConfig.inputPath()))
-                .then(new MinioUploaderTask(minioClient, outputDir, minioConfig.bucketName()));
 
         logger.info("🚀 Starting Tutorial Generation for: " + appConfig.inputPath());
-        try {
-            Object finalOutput = tasksPipeLine.run(appConfig.inputPath()).get();
+        try(TaskPipeline tasksPipeLine = new TaskPipeline()){
+            tasksPipeLine.add("Code-crawler", new CodeCrawlerTask())
+                    .then("Identify-abstraction", new IdentifyAbstractionsTask(chatModel, appConfig.projectName()))
+                    .then("Identify-relationships",new IdentifyRelationshipsTask(chatModel, appConfig.projectName()))
+                    .then("Chapter-organizer",new ChapterOrganizerTask(chatModel))
+                    .then("Technical-writer",new TechnicalWriterTask(chatModel, outputDir))
+                    .then("Meta-info",new MetaInfoTask(chatModel, outputDir, appConfig.projectName(), appConfig.inputPath()))
+                    .then("Minio-upload", new MinioUploaderTask(minioClient, outputDir, minioConfig.bucketName()));
+            tasksPipeLine.run(appConfig.inputPath()).join();
             logger.info("\n✅ Tutorial generation complete! Output located at: " + outputDir);
-            if (finalOutput instanceof UploadResult uploadResult) {
-                logger.info("\n✅ %d files uploaded, %d failed to upload. See logs for details.".formatted(uploadResult.getSuccessCount(), uploadResult.getFailureCount()));
-            }
-        } catch (Exception e) {
-            logger.severe("❌ Tutorial generation failed: " + e.getMessage());
-            throw new RuntimeException("Tutorial generation failed", e);
         }
-
     }
-
 
     public ProviderConfig getProviderConfig() {
         LLMProvider llmProvider = waverConfig.llmProvider();

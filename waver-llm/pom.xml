@@ -21,9 +21,9 @@
     <dependencies>
         <!-- Core module dependency -->
         <dependency>
-            <groupId>dev.shaaf.waver</groupId>
-            <artifactId>waver-core</artifactId>
-            <version>${project.version}</version>
+            <groupId>dev.shaaf.jgraphlet</groupId>
+            <artifactId>jgraphlet</artifactId>
+            <version>0.1.0</version>
         </dependency>
         <!-- Langchain4j dependencies -->
         <dependency>

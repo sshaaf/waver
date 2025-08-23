@@ -1,9 +1,9 @@
 package dev.shaaf.waver.tutorial.task;
 
 import java.util.concurrent.CompletableFuture;
-import dev.shaaf.waver.core.PipelineContext;
-import dev.shaaf.waver.core.Task;
-import dev.shaaf.waver.core.TaskRunException;
+import dev.shaaf.jgraphlet.PipelineContext;
+import dev.shaaf.jgraphlet.Task;
+import dev.shaaf.jgraphlet.TaskRunException;
 import dev.shaaf.waver.files.FetchRepo;
 import dev.shaaf.waver.files.GitHubRepoFetcher;
 import dev.shaaf.waver.tutorial.model.GenerationContext;
@@ -32,7 +32,7 @@ public class CodeCrawlerTask implements Task<String, GenerationContext> {
                     return new GenerationContext(FetchRepo.crawl(inputString), null, null, null, null);
                 }
                 else
-                    throw new TaskRunException(inputString, "Invalid input type");
+                    throw new RuntimeException("Invalid input type "+inputString);
             } catch (Exception e) {
                 throw new TaskRunException("Failed to crawl code", e);
             }

@@ -14,7 +14,6 @@
     <description>Parent project for Waver multi-module build</description>
 
     <modules>
-        <module>waver-core</module>
         <module>waver-llm</module>
         <module>waver-cli</module>
         <module>waver-backend</module>

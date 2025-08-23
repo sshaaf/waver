@@ -1,7 +1,6 @@
 package dev.shaaf.waver.files;
 
 import dev.shaaf.waver.config.AppConfig;
-import dev.shaaf.waver.core.TaskRunException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -55,7 +54,7 @@ public class GitHubRepoFetcher {
             return matcher.group(1);
         }
 
-        throw new TaskRunException("Unable to parse URL to create local copy: " + urlString);
+        throw new RuntimeException("Unable to parse URL to create local copy: " + urlString);
     }
 
 
