@@ -43,15 +43,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: waver-jar
-          path: waver-cli/target/waver-cli-*.jar
-      
+          path: target/waver-cli-*.jar
+
   native-linux:
     name: Build Native Linux
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -60,15 +60,15 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           native-image-job-reports: 'true'
       - run: mvn clean install
-      
+
       - name: Build Native Image
-        run: mvn package -pl waver-cli -Pnative
-      
+        run: mvn package -Pnative
+
       - name: Upload Linux Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-linux
-          path: waver-cli/target/waver-cli
+          path: target/waver-cli
 
   native-macos:
     name: Build Native macOS (Apple Silicon)
@@ -76,7 +76,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Set up GraalVM
         uses: graalvm/setup-graalvm@v1
         with:
@@ -87,13 +87,13 @@ jobs:
       - run: mvn clean install
 
       - name: Build Native Image
-        run: mvn package -pl waver-cli -Pnative
-      
+        run: mvn package -Pnative
+
       - name: Upload macOS Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-macos
-          path: waver-cli/target/waver-cli
+          path: target/waver-cli
 
   native-windows:
     name: Build Native Windows
@@ -140,10 +140,10 @@ jobs:
       - run: mvn clean install
 
       - name: Build Native Image
-        run: mvn package -pl waver-cli -Pnative
-      
+        run: mvn package -Pnative
+
       - name: Upload Windows Native Executable
         uses: actions/upload-artifact@v4
         with:
           name: waver-windows
-          path: waver-cli/target/waver-cli.exe
+          path: target/waver-cli.exe
